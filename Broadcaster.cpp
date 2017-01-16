@@ -36,7 +36,7 @@ int Broadcaster::sendBuffer(char* buffer){
 
 int Broadcaster::receiveBuffer(char* buffer){
     int nBytes;
-    nBytes = recvfrom(rcv_sock,buffer,BUFFSIZE,0, (struct sockaddr *)&serverStorage, &server_size);
+    nBytes = recvfrom(rcv_sock,buffer,1024,0, (struct sockaddr *)&serverStorage, &server_size);
     return nBytes;
 }
 
