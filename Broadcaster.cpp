@@ -3,7 +3,7 @@
 Broadcaster::Broadcaster(int portNum){
 
     setReceiver(portNum);
-    setSender(portNum,"194.210.223.109");
+    setSender(portNum,"127.0.0.1");
 
 }
 

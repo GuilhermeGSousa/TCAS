@@ -2,12 +2,14 @@ CC=g++
 CFLAGS = -c
 CLINK = -o
 
-all: main.o Broadcaster.o
-	$(CC) main.o Broadcaster.o $(CLINK) main
+all: sender.o Broadcaster.o
+	$(CC) sender.o Broadcaster.o $(CLINK) sender
+	$(CC) receiver.o Broadcaster.o $(CLINK) receiver
 
 Broadcaster.o: Broadcaster.cpp
 	$(CC) $(CFLAGS)  Broadcaster.cpp
-main.o: main.cpp
-	$(CC) $(CFLAGS)  main.cpp
-
+sender.o: sender.cpp
+	$(CC) $(CFLAGS)  sender.cpp
+receiver.o: receiver.cpp
+	$(CC) $(CFLAGS)  receiver.cpp
 

@@ -5,8 +5,9 @@ int main(int argc, char const *argv[])
     Broadcaster broadcaster = Broadcaster(10505);
     char buffer[1024];
     while(1){
-        broadcaster.sendBuffer("Hola");
-        
+        printf("Type a sentence to send to server:\n");
+        fgets(buffer,1024,stdin);   
+        broadcaster.sendBuffer(buffer);
     }
 
     return 0;
