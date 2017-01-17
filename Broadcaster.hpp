@@ -2,7 +2,7 @@
 #define BROADCASTER_HPP
 
 
-
+#include <iostream>
 #include <stdio.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -12,7 +12,7 @@
 #include <iostream>
 
 #define BUFFSIZE 124
-
+using namespace std;
 typedef struct
 {
     char header[16];//16 bytes
@@ -39,6 +39,7 @@ public:
     Broadcaster(int);
     int sendBuffer(char *);
     int receiveBuffer(char *);
+    void messageToBuffer(char *, Message);
     ~Broadcaster();
 private:
     int send_sock, rcv_sock;
@@ -46,6 +47,10 @@ private:
     struct sockaddr_in sendAddr, rcvAddr, serverStorage;
     void setReceiver(int);
     void setSender(int,const char*);
+    void doubleToBuff(char *,double );
+    void uint64ToBuff(char *,uint64_t);
+    void uint32ToBuff(char *,uint32_t);
+
 };
 
 #endif
