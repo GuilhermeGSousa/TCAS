@@ -13,6 +13,26 @@
 
 #define BUFFSIZE 124
 
+typedef struct
+{
+    char header[16];//16 bytes
+    uint64_t Ac_id; //64 bits
+    double X_pos; //64 bits na mesma mas este tem um bit de sinal
+    double Y_pos;
+    double Z_pos;
+    double X_spd;
+    double Y_spd;
+    double Z_spd;
+    char TCAS_status[16];
+    uint64_t Intruder_hex;//Não sei o que e isto
+    char Resolution[16];
+    double Resolution_val;
+    uint32_t CRC_32; //Não sei o que é isto
+
+    //Se não me enganei nas contas o total da 128 bytes
+}Message;
+
+
 class Broadcaster
 {
 public:
