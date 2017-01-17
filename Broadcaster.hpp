@@ -40,6 +40,7 @@ public:
     int sendBuffer(char *);
     int receiveBuffer(char *);
     void messageToBuffer(char *, Message);
+    uint32_t checksumCalc(char*);
     ~Broadcaster();
 private:
     int send_sock, rcv_sock;

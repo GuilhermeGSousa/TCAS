@@ -10,18 +10,6 @@ int main(int argc, char const *argv[])
     //     cout<<"Received"<<endl;
     // }
 
-    Message m;
-
-    strcpy(m.header,"OLA!");
-    m.Intruder_hex=65;
-    strcpy(m.TCAS_status,"HEYO");
-
-
-    broadcaster.messageToBuffer(buffer, m);
-
-
-
-    cout<<(int)buffer[95]<<endl;;
 
 
     return 0;

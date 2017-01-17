@@ -7,6 +7,22 @@ Broadcaster::Broadcaster(int portNum){
 
 }
 
+uint32_t Broadcaster::checksumCalc(char* message){
+    uint32_t checkSum= 0;
+    int shift=0;
+    for (int i = 0; i < BUFFSIZE-4; ++i)
+    {
+        checkSum += (message[i] << shift);
+        shift += 8;
+        if (shift==32)
+        {
+            shift=0;
+        }
+    }
+
+    return checkSum;
+}
+
 void Broadcaster::setSender(int portNum, const char* dest_addr){
     send_sock = socket(AF_INET, SOCK_DGRAM, 0);
 
@@ -43,15 +59,16 @@ void Broadcaster::uint64ToBuff(char *out,uint64_t in){
     uint64_t aux=in;
     for(int i=0; i<8; i++){
 
-        out[i]= (in & 0xFF);
+        out[8-i]= (aux & 0xFF);
         aux=(aux >> 8);
     }
 }
+
 void Broadcaster::uint32ToBuff(char *out, uint32_t in){
     uint32_t aux=in;
     for(int i=0; i<4; i++){
 
-        out[i]= (in & 0xFF);
+        out[8-i]= (aux & 0xFF);
         aux=(aux >> 8);
     }
 }
@@ -147,7 +164,7 @@ void Broadcaster::messageToBuffer(char* buffer, Message m){
     }
     index+=8;
 
-    //??????
+    //Checksum
 
     uint32ToBuff(aux4,m.CRC_32);
     for (int i = 0; i < 8; ++i)
