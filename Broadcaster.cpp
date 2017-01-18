@@ -28,7 +28,7 @@ void Broadcaster::setSender(int portNum, const char* dest_addr){
 
     sendAddr.sin_family = AF_INET;
     sendAddr.sin_port = htons(portNum);
-    sendAddr.sin_addr.s_addr = inet_addr(dest_addr); //Mudar
+    sendAddr.sin_addr.s_addr = inet_addr(dest_addr); //mudar
     memset(sendAddr.sin_zero, '\0', sizeof sendAddr.sin_zero); 
 
 }
@@ -55,11 +55,25 @@ void Broadcaster::doubleToBuff(char *out,double in){
         out[i]=u.buff[i];
     }
 }
+
+double Broadcaster::bufferToDouble(char * buffer){
+    union{
+        char in[8];
+        double out;
+    }u;
+
+    for (int i = 0; i < 8; ++i)
+    {
+        u.in[i]=buffer[i];
+    }
+    return u.out;
+}
+
 void Broadcaster::uint64ToBuff(char *out,uint64_t in){
     uint64_t aux=in;
     for(int i=0; i<8; i++){
 
-        out[8-i]= (aux & 0xFF);
+        out[7-i] = (aux & 0xFF);
         aux=(aux >> 8);
     }
 }
@@ -68,24 +82,24 @@ void Broadcaster::uint32ToBuff(char *out, uint32_t in){
     uint32_t aux=in;
     for(int i=0; i<4; i++){
 
-        out[8-i]= (aux & 0xFF);
+        out[7-i]= (aux & 0xFF);
         aux=(aux >> 8);
     }
 }
-void Broadcaster::messageToBuffer(char* buffer, Message m){
+void Broadcaster::messageToBuffer(char* buffer, Message out){
 
     int index=0;
     char aux8[8],aux4[4];
     char buff[BUFFSIZE];
 
     for(int i=0;i<16;++i){
-        buff[i+index]=m.header[i];
+        buff[i+index]=out.header[i];
     }
     index+=16;
 
 
     //AC id
-    uint64ToBuff(aux8,m.Ac_id);
+    uint64ToBuff(aux8,out.Ac_id);
     for (int i = 0; i < 8; ++i)
     {
         buff[i+index]=aux8[i];
@@ -94,42 +108,42 @@ void Broadcaster::messageToBuffer(char* buffer, Message m){
 
 
     //Pos and Speed
-    doubleToBuff(aux8,m.X_pos);
+    doubleToBuff(aux8,out.X_pos);
     for (int i = 0; i < 8; ++i)
     {
         buff[i+index]=aux8[i];
     }
     index+=8;
     
-    doubleToBuff(aux8,m.Y_pos);
+    doubleToBuff(aux8,out.Y_pos);
     for (int i = 0; i < 8; ++i)
     {
         buff[i+index]=aux8[i];
     }
     index+=8;
     
-    doubleToBuff(aux8,m.Z_pos);
+    doubleToBuff(aux8,out.Z_pos);
     for (int i = 0; i < 8; ++i)
     {
         buff[i+index]=aux8[i];
     }
     index+=8;
 
-    doubleToBuff(aux8,m.X_spd);
+    doubleToBuff(aux8,out.X_spd);
     for (int i = 0; i < 8; ++i)
     {
         buff[i+index]=aux8[i];
     }
     index+=8;
     
-    doubleToBuff(aux8,m.Y_spd);
+    doubleToBuff(aux8,out.Y_spd);
     for (int i = 0; i < 8; ++i)
     {
         buff[i+index]=aux8[i];
     }
     index+=8;
     
-    doubleToBuff(aux8,m.Z_spd);
+    doubleToBuff(aux8,out.Z_spd);
     for (int i = 0; i < 8; ++i)
     {
         buff[i+index]=aux8[i];
@@ -138,46 +152,127 @@ void Broadcaster::messageToBuffer(char* buffer, Message m){
     
     //TCAS status
     for(int i=0;i<16;++i){
-        buff[i+index]=m.TCAS_status[i];
+        buff[i+index]=out.TCAS_status[i];
     }
     index+=16;
 
     //Intruder hex
-    uint64ToBuff(aux8,m.Intruder_hex);
+    uint64ToBuff(aux8,out.Intruder_hex);
     for (int i = 0; i < 8; ++i)
     {
         buff[i+index]=aux8[i];
     }
     index+=8;
-    cout<<index<<endl;
+
     //Resolution
     for(int i=0;i<16;++i){
-        buff[i+index]=m.Resolution[i];
+        buff[i+index]=out.Resolution[i];
     }
     index+=16;
 
     //Resolution value
-    doubleToBuff(aux8,m.Resolution_val);
+    doubleToBuff(aux8,out.Resolution_val);
     for (int i = 0; i < 8; ++i)
     {
         buff[i+index]=aux8[i];
     }
     index+=8;
 
-    //Checksum
+    //Checksuout
 
-    uint32ToBuff(aux4,m.CRC_32);
+    uint32ToBuff(aux4,out.CRC_32);
     for (int i = 0; i < 8; ++i)
     {
         buff[i+index]=aux8[i];
     }
-    index+=4;
+
 
     for (int i = 0; i < BUFFSIZE; ++i)
     {
         buffer[i]=buff[i];
     }
 
+}
+
+Message Broadcaster::bufferToMessage(char buffer[BUFFSIZE]){
+    Message out;
+    int index = 0;
+    char aux[8];
+    for (int i = 0; i < 16; ++i)
+    {
+        out.header[i]=buffer[i+index];
+    }index+=16;
+
+    out.Ac_id = ((unsigned long)buffer[0+index] << 56) + ((unsigned long)buffer[1+index] << 48) + ((unsigned long)buffer[2+index] << 40) + ((unsigned long)buffer[3+index] << 32) + 
+                ((unsigned long)buffer[4+index] << 24) + ((unsigned long)buffer[5+index] << 16) + ((unsigned long)buffer[6+index] << 8) + (unsigned long)buffer[7+index];
+    index+=8;
+
+    //Speed and Pos
+    for (int i = 0; i < 8; ++i)
+    {
+        aux[i]=buffer[i+index];
+    }index+=8;
+    out.X_pos = bufferToDouble(aux);
+
+    for (int i = 0; i < 8; ++i)
+    {
+        aux[i]=buffer[i+index];
+    }index+=8;
+    out.Y_pos = bufferToDouble(aux);
+
+    for (int i = 0; i < 8; ++i)
+    {
+        aux[i]=buffer[i+index];
+    }index+=8;
+    out.Z_pos = bufferToDouble(aux);
+
+    for (int i = 0; i < 8; ++i)
+    {
+        aux[i]=buffer[i+index];
+    }index+=8;
+    out.X_spd = bufferToDouble(aux);
+
+    for (int i = 0; i < 8; ++i)
+    {
+        aux[i]=buffer[i+index];
+    }index+=8;
+    out.Y_spd = bufferToDouble(aux);
+
+    for (int i = 0; i < 8; ++i)
+    {
+        aux[i]=buffer[i+index];
+    }index+=8;
+    out.Z_pos = bufferToDouble(aux);
+
+    //TCAS status
+    for (int i = 0; i < 16; ++i)
+    {
+        out.TCAS_status[i]=buffer[i+index];
+    }index+=16;
+
+    //Intruder
+    out.Intruder_hex = ((unsigned long)buffer[0+index] << 56) + ((unsigned long)buffer[1+index] << 48) + ((unsigned long)buffer[2+index] << 40) + ((unsigned long)buffer[3+index] << 32) + 
+                        ((unsigned long)buffer[4+index] << 24) + ((unsigned long)buffer[5+index] << 16) + ((unsigned long)buffer[6+index] << 8) + (unsigned long)buffer[7+index];
+    index+=8;
+
+    //Resolution
+    for (int i = 0; i < 16; ++i)
+    {
+        out.Resolution[i]=buffer[i+index];
+    }index+=16;
+
+    for (int i = 0; i < 8; ++i)
+    {
+        aux[i]=buffer[i+index];
+    }index+=8;
+    out.Resolution_val = bufferToDouble(aux);
+
+    //Checksum
+
+        out.CRC_32 = (buffer[0+index] << 24) + (buffer[1+index] << 16) + (buffer[2+index] << 8) + (buffer[3+index]) ;
+    index+=4;
+
+    return out;
 }
 
 int Broadcaster::sendBuffer(char* buffer){

@@ -27,7 +27,7 @@ typedef struct
     uint64_t Intruder_hex;//Não sei o que e isto
     char Resolution[16];
     double Resolution_val;
-    uint32_t CRC_32; //Não sei o que é isto
+    uint32_t CRC_32; //Checksum
 
     //Se não me enganei nas contas o total da 128 bytes
 }Message;
@@ -40,6 +40,7 @@ public:
     int sendBuffer(char *);
     int receiveBuffer(char *);
     void messageToBuffer(char *, Message);
+    Message bufferToMessage(char *);
     uint32_t checksumCalc(char*);
     ~Broadcaster();
 private:
@@ -48,9 +49,11 @@ private:
     struct sockaddr_in sendAddr, rcvAddr, serverStorage;
     void setReceiver(int);
     void setSender(int,const char*);
-    void doubleToBuff(char *,double );
+    void doubleToBuff(char *,double);
+    double bufferToDouble(char *);
     void uint64ToBuff(char *,uint64_t);
     void uint32ToBuff(char *,uint32_t);
+
 
 };
 
