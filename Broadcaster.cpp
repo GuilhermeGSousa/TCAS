@@ -45,28 +45,14 @@ void Broadcaster::setReceiver(int portNum){
 }
 
 void Broadcaster::doubleToBuff(char *out,double in){
-    union{
-        double doubleVal;
-        char buff[sizeof(doubleVal)];
-    }u;
-
-    for (int i = 0; i < sizeof(u.doubleVal); ++i)
-    {
-        out[i]=u.buff[i];
-    }
+    memcpy(out,(double *)&in,sizeof(double));
 }
 
 double Broadcaster::bufferToDouble(char * buffer){
-    union{
-        char in[8];
-        double out;
-    }u;
+    double out;
 
-    for (int i = 0; i < 8; ++i)
-    {
-        u.in[i]=buffer[i];
-    }
-    return u.out;
+    memcpy((double *)&out,buffer,sizeof(double));
+    return out;
 }
 
 void Broadcaster::uint64ToBuff(char *out,uint64_t in){
