@@ -263,13 +263,13 @@ Message Broadcaster::bufferToMessage(char buffer[BUFFSIZE]){
 
 int Broadcaster::sendBuffer(char* buffer){
     int nBytes;
-    nBytes=sendto(send_sock,buffer,strlen(buffer)+1,0,(struct sockaddr*)&sendAddr,sizeof(sendAddr));
+    nBytes=sendto(send_sock,buffer,BUFFSIZE,0,(struct sockaddr*)&sendAddr,sizeof(sendAddr));
     return nBytes;
 }
 
 int Broadcaster::receiveBuffer(char* buffer){
     int nBytes;
-    nBytes = recvfrom(rcv_sock,buffer,1024,0, (struct sockaddr *)&serverStorage, &server_size);
+    nBytes = recvfrom(rcv_sock,buffer,BUFFSIZE,0, (struct sockaddr *)&serverStorage, &server_size);
     return nBytes;
 }
 
