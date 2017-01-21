@@ -24,8 +24,8 @@ void Widget::paintEvent(QPaintEvent *event)
 
 void Widget::resizeEvent(QResizeEvent *event){
 
-    totalWidth = this->width();
-    totalHeight = this->height();
+    totalWidth = ui->graphicsView->width();
+    totalHeight = ui->graphicsView->height();
 
 }
 
