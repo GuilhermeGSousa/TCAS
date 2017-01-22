@@ -7,7 +7,7 @@
 #include <QPixmap>
 #include <QGraphicsPixmapItem>
 #include <QGraphicsItemAnimation>
-#include "broadcaster.h"
+#include "scenemanager.h"
 #include "pointer.h"
 
 namespace Ui {
@@ -42,8 +42,8 @@ private:
     QGraphicsPixmapItem* pln;
     qint32 radius;
     QTimer *time;
-
-
+    SceneManager *scene_manager;
+    Broadcaster *broadcaster;
 
 
 

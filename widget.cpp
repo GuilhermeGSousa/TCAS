@@ -11,10 +11,21 @@ Widget::Widget(QWidget *parent) :
     plane = QPixmap::fromImage(QImage(":/plane"));
     intruder = QPixmap::fromImage(QImage(":/rhombus"));
     scale=0.3;
+    broadcaster = new Broadcaster(7891);
+    scene_manager=new SceneManager(scene,broadcaster);
 
     time = new QTimer(this);
+    QThread* listener = new QThread;
+    scene_manager->moveToThread(listener);
+    broadcaster->moveToThread(listener);
+
+    connect(listener,SIGNAL(started()),broadcaster,SLOT(listenBuffer()));
+    connect(broadcaster,SIGNAL(messageReceived(char*)),scene_manager,SLOT(updateScene(char*)));
     connect(time,SIGNAL(timeout()),scene,SLOT(advance()));
     time->start(10);
+    listener->start();
+
+
 }
 
 void Widget::paintEvent(QPaintEvent *event)

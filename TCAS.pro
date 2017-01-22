@@ -15,11 +15,13 @@ TEMPLATE = app
 SOURCES += main.cpp\
         widget.cpp \
     pointer.cpp \
-    broadcaster.cpp
+    broadcaster.cpp \
+    scenemanager.cpp
 
 HEADERS  += widget.h \
     pointer.h \
-    broadcaster.h
+    broadcaster.h \
+    scenemanager.h
 
 FORMS    += widget.ui
 

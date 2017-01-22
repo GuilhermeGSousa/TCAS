@@ -1,5 +1,5 @@
 #include "broadcaster.h"
-
+#include <QDebug>
 Broadcaster::Broadcaster(int portNum){
 
     setReceiver(portNum);
@@ -270,9 +270,17 @@ int Broadcaster::sendBuffer(char* buffer){
     return nBytes;
 }
 
+void Broadcaster::listenBuffer()
+{
+    char b[BUFFSIZE];
+    while(true)
+        receiveBuffer(b);
+}
+
 int Broadcaster::receiveBuffer(char* buffer){
     int nBytes;
     nBytes = recvfrom(rcv_sock,buffer,BUFFSIZE,0, (struct sockaddr *)&serverStorage, &server_size);
+    emit messageReceived(buffer);
     return nBytes;
 }
 

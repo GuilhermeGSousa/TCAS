@@ -10,6 +10,7 @@
 #include <string.h>
 #include <arpa/inet.h>
 #include <iostream>
+#include <QObject>
 
 #define BUFFSIZE 124
 using namespace std;
@@ -33,16 +34,22 @@ typedef struct
 }Message;
 
 
-class Broadcaster
+class Broadcaster : public QObject
 {
+    Q_OBJECT
 public:
-    Broadcaster(int);
-    int sendBuffer(char *);
-    int receiveBuffer(char *);
+    Broadcaster(int portNum);
     void messageToBuffer(char *, Message);
     Message bufferToMessage(char *);
     uint32_t checksumCalc(char*);
     ~Broadcaster();
+    int receiveBuffer(char *);
+    int sendBuffer(char *);
+public slots:
+    void listenBuffer();
+signals:
+    void messageReceived(char*);
+
 private:
     int send_sock, rcv_sock;
     socklen_t server_size;
