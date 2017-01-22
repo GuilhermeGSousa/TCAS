@@ -11,21 +11,6 @@ Widget::Widget(QWidget *parent) :
     plane = QPixmap::fromImage(QImage(":/plane"));
     intruder = QPixmap::fromImage(QImage(":/rhombus"));
     scale=0.3;
-    broadcaster = new Broadcaster(7891);
-    scene_manager=new SceneManager(scene,broadcaster);
-
-    time = new QTimer(this);
-    QThread* listener = new QThread;
-    scene_manager->moveToThread(listener);
-    broadcaster->moveToThread(listener);
-
-    connect(listener,SIGNAL(started()),broadcaster,SLOT(listenBuffer()));
-    connect(broadcaster,SIGNAL(messageReceived(char*)),scene_manager,SLOT(updateScene(char*)));
-    connect(time,SIGNAL(timeout()),scene,SLOT(advance()));
-    time->start(10);
-    listener->start();
-
-
 }
 
 void Widget::paintEvent(QPaintEvent *event)
@@ -41,6 +26,8 @@ void Widget::resizeEvent(QResizeEvent *event){
 }
 
 void Widget::setup(){
+
+
     QBrush greyBrush(Qt::gray);
     QBrush blackBrush(Qt::black);
     QPen whitePen(Qt::white);
@@ -60,6 +47,23 @@ void Widget::setup(){
     scene->addItem(point);
 }
 
+void Widget::setupListener(int portNum)
+{
+    broadcaster = new Broadcaster(portNum);
+    scene_manager=new SceneManager(scene,broadcaster);
+
+    time = new QTimer(this);
+    QThread* listener = new QThread;
+    scene_manager->moveToThread(listener);
+    broadcaster->moveToThread(listener);
+
+    connect(listener,SIGNAL(started()),broadcaster,SLOT(listenBuffer()));
+    connect(broadcaster,SIGNAL(messageReceived(char*)),scene_manager,SLOT(updateScene(char*)));
+    connect(time,SIGNAL(timeout()),scene,SLOT(advance()));
+    time->start(10);
+    listener->start();
+}
+
 
 
 
@@ -75,10 +79,15 @@ void Widget::on_pushButton_clicked()
 {
     //Eu depois limpo isto
     //Mas limpa mesmo Gui isto parece o teu quarto
-
-    setup();
-    ui->pushButton->setVisible(false);
-
+    if(ui->lineEdit->text().size()==0)
+        return;
+    else{
+        setup();
+        setupListener(ui->lineEdit->text().toInt());
+        ui->pushButton->setVisible(false);
+        ui->label->setVisible(false);
+        ui->lineEdit->setVisible(false);
+    }
 
 }
 

@@ -20,14 +20,15 @@ class Widget : public QWidget
 
 public:
     explicit Widget(QWidget *parent = 0);
-    void setup();
     ~Widget();
 
 private slots:
     void on_pushButton_clicked();
     void paintEvent(QPaintEvent *event);
     void resizeEvent(QResizeEvent *event);
-
+private:
+    void setup();
+    void setupListener(int portNum);
 
 private:
     Ui::Widget *ui;
