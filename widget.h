@@ -4,11 +4,9 @@
 #include <QWidget>
 #include <QtCore>
 #include <QGraphicsScene>
-#include <QPixmap>
-#include <QGraphicsPixmapItem>
 #include <QGraphicsItemAnimation>
 #include "scenemanager.h"
-#include "pointer.h"
+#include "sceneitems.h"
 
 namespace Ui {
 class Widget;
@@ -37,10 +35,6 @@ private:
     QGraphicsEllipseItem *ellipse;
     int totalWidth;
     int totalHeight;
-    QPixmap plane;
-    QPixmap intruder;
-    QGraphicsPixmapItem* intr;
-    QGraphicsPixmapItem* pln;
     qint32 radius;
     QTimer *time;
     SceneManager *scene_manager;

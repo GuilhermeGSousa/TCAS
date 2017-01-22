@@ -14,14 +14,14 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         widget.cpp \
-    pointer.cpp \
     broadcaster.cpp \
-    scenemanager.cpp
+    scenemanager.cpp \
+    sceneitems.cpp
 
 HEADERS  += widget.h \
-    pointer.h \
     broadcaster.h \
-    scenemanager.h
+    scenemanager.h \
+    sceneitems.h
 
 FORMS    += widget.ui
 
