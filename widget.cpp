@@ -34,14 +34,16 @@ void Widget::setup(){
     scene->setBackgroundBrush(greyBrush);
     radius=totalHeight*0.9/2;
 
-    SceneItems *point = new SceneItems(totalWidth,totalHeight,radius);
-    scene->addItem(point);
+    SceneItems *scene_items = new SceneItems(totalWidth,totalHeight,radius);
+    scene->addItem(scene_items);
+
+    scene_manager=new SceneManager(scene_items,broadcaster);
 }
 
 void Widget::setupListener(int portNum)
 {
     broadcaster = new Broadcaster(portNum);
-    scene_manager=new SceneManager(scene,broadcaster);
+
 
     time = new QTimer(this);
     QThread* listener = new QThread;

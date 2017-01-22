@@ -25,10 +25,30 @@ void SceneItems::advance(int phase){
 
 }
 
-bool SceneItems::isIdInList()
+void SceneItems::addIntruder(Message m)
+{
+    if(isIdInList(m.Ac_id))
+        return;
+    else
+        intruder_list.append(m);
+}
+
+bool SceneItems::isIdInList(int id)
+{
+    //TODO check if this id exists in the intruder list
+    foreach(Message m, intruder_list){
+        if(m.Ac_id==id)
+            return true;
+    }
+    return false;
+
+}
+
+void SceneItems::drawIntruders(QPainter *painter)
 {
 
 }
+
 
 
 void SceneItems::rotatePointer(qreal rotation){

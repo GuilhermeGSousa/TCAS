@@ -2,14 +2,17 @@
 #include <QDebug>
 
 
-SceneManager::SceneManager(QGraphicsScene *scene_input,Broadcaster *b)
+SceneManager::SceneManager(SceneItems *scene_input,Broadcaster *b)
 {
-    scene = scene_input;
+    scene_items = scene_input;
+    broadcaster = b;
 }
 
 void SceneManager::updateScene(char *buffer)
 {
     Message m = broadcaster->bufferToMessage(buffer);
+    scene_items->addIntruder(m);
+
     qDebug()<<m.X_pos;
 }
 

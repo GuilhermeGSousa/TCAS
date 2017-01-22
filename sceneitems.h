@@ -19,9 +19,11 @@ public:
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
     SceneItems(qreal width, qreal height, qreal length);
     void advance(int phase);
-    bool isIdInList(int id);
+    void addIntruder(Message m);
 private:
     void rotatePointer(qreal rotation);
+    bool isIdInList(int id);
+    void drawIntruders(QPainter *painter);
     qreal width,length,height;
     qreal x1,x2,y1,y2;
     qreal ang;

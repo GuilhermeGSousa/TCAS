@@ -3,19 +3,20 @@
 
 #include <QObject>
 #include <QGraphicsScene>
+#include "sceneitems.h"
 #include "broadcaster.h"
 
 class SceneManager : public QObject
 {
     Q_OBJECT
 public:
-    SceneManager(QGraphicsScene*,Broadcaster*);
+    SceneManager(SceneItems*,Broadcaster*);
 
 public slots:
     void updateScene(char*);
 signals:
 private:
-    QGraphicsScene* scene;
+    SceneItems* scene_items;
     Broadcaster* broadcaster;
 };
 
