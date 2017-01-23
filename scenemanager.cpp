@@ -12,7 +12,6 @@ void SceneManager::updateScene(char *buffer)
 {
     Message m = broadcaster->bufferToMessage(buffer);
     scene_items->addIntruder(m);
-
-    qDebug()<<m.X_pos;
+    scene_items->updateIntruders();
 }
 

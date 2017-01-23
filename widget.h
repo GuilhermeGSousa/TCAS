@@ -24,6 +24,22 @@ private slots:
     void on_pushButton_clicked();
     void paintEvent(QPaintEvent *event);
     void resizeEvent(QResizeEvent *event);
+    void on_leftButton_clicked();
+
+    void on_rightButton_clicked();
+
+    void on_upButton_clicked();
+
+    void on_downButton_clicked();
+
+    void on_leftButton_pressed();
+
+    void on_downButton_pressed();
+
+    void on_rightButton_pressed();
+
+    void on_upButton_pressed();
+
 private:
     void setup();
     void setupListener(int portNum);
@@ -37,6 +53,7 @@ private:
     int totalHeight;
     qint32 radius;
     QTimer *time;
+    SceneItems *scene_items;
     SceneManager *scene_manager;
     Broadcaster *broadcaster;
 

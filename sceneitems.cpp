@@ -1,5 +1,5 @@
 #include "sceneitems.h"
-
+#include <QDebug>
 
 SceneItems::SceneItems(qreal width,qreal height,qreal length)
 {
@@ -11,7 +11,9 @@ SceneItems::SceneItems(qreal width,qreal height,qreal length)
     x2=x1-length;
     y2=y1;
     ang=0;
-    intruder_image = QPixmap::fromImage(QImage(":/rhombus"));
+    intruder_image = QPixmap::fromImage(QImage(":/PT"));
+    intruder_scale=0.5;
+
     plane_image =  QPixmap::fromImage(QImage(":/plane"));
 }
 
@@ -20,17 +22,33 @@ void SceneItems::advance(int phase){
     //Main loop here
 
     if(!phase) return;
-    rotatePointer(ang*qreal(M_PI)/180.0);
-    ang += 0.5;
+
+    ang=self.Z_spd*qreal(M_PI)/100.0;
+    if(ang>qreal(M_PI))
+        ang=qreal(M_PI);
+    if(ang<-qreal(M_PI))
+        ang=-qreal(M_PI);
+
+    rotatePointer(ang);
+
 
 }
 
 void SceneItems::addIntruder(Message m)
 {
-    if(isIdInList(m.Ac_id))
-        return;
-    else
-        intruder_list.append(m);
+    //Add new intruder to list or update intruder messages
+    for(int i = 0; i < intruder_list.length(); i++){
+        if(m.Ac_id == intruder_list[i].Ac_id){
+            intruder_list.replace(i,m);
+            return;
+        }
+    }
+    intruder_list.append(m);
+}
+
+void SceneItems::updateIntruders()
+{
+    //Remove intruders too far away
 }
 
 bool SceneItems::isIdInList(int id)
@@ -47,6 +65,60 @@ bool SceneItems::isIdInList(int id)
 void SceneItems::drawIntruders(QPainter *painter)
 {
 
+    int plane_width = plane_image.width();
+    int plane_height = plane_image.height();
+    qreal center_x = width/2-plane_width*(plane_scale/2);
+    qreal center_y = height/2+plane_height*plane_scale*1.5;
+
+
+    foreach(Message i, intruder_list){
+        qreal x = i.X_pos/NM2M;
+        qreal y = i.Y_pos/NM2M;
+
+        //Limit=6nm
+
+        painter->drawPixmap(mapToParent(center_x+x*length/MAXRANGE-intruder_image.width()*intruder_scale/2,
+                                        center_y-y*length/MAXRANGE-intruder_image.height()*intruder_scale/2).x(),
+                            mapToParent(center_x+x*length/MAXRANGE-intruder_image.width()*intruder_scale/2,
+                                        center_y-length/MAXRANGE-intruder_image.height()*intruder_scale/2).y(),
+                            intruder_image.width()*intruder_scale,
+                            intruder_image.height()*intruder_scale,
+                            intruder_image);
+    }
+}
+
+void SceneItems::setupSelf()
+{
+    self.X_pos = 0;
+    self.Y_pos = 0;
+    self.Z_pos = 0;
+}
+
+QVector3D SceneItems::ECEF2ENU(QVector3D vec)
+{
+
+}
+
+qreal SceneItems::getDistanceToSelf(Message intruder)
+{
+    sqrt(pow(self.X_pos-intruder.X_pos,2)+
+         pow(self.Y_pos-intruder.Y_pos,2)+
+         pow(self.Z_pos-intruder.Z_pos,2));
+}
+
+Message SceneItems::getSelf() const
+{
+    return self;
+}
+
+void SceneItems::goUp()
+{
+    self.Z_spd += SPD_INCR;
+}
+
+void SceneItems::goDown()
+{
+    self.Z_spd -= SPD_INCR;
 }
 
 
@@ -77,7 +149,7 @@ void SceneItems::paint(QPainter *painter, const QStyleOptionGraphicsItem *option
     QBrush greyBrush(Qt::gray);
     whitePen.setWidth(10);
     painter->setPen(whitePen);
-    double scale = 0.3;
+    plane_scale = 0.15;
     int plane_width = plane_image.width();
     int plane_height = plane_image.height();
     const QLineF* pointer = new QLineF(x1,y1,x2,y2);
@@ -85,9 +157,9 @@ void SceneItems::paint(QPainter *painter, const QStyleOptionGraphicsItem *option
     //Paint Items here
     painter->drawLine(*pointer);
     painter->drawEllipse(width/2-length,height/2-length,length*2,length*2);
-    painter->drawPixmap(mapToParent(0,0).x(),mapToParent(0,0).y(),intruder_image.width(),intruder_image.height(),intruder_image);
-    painter->drawPixmap(width/2-plane_width*(scale/2),height/2+plane_height*scale*1.5,
-                        plane_width*scale,plane_height*scale,plane_image);
+    painter->drawPixmap(width/2-plane_width*(plane_scale/2),height/2+plane_height*plane_scale*1.5,
+                        plane_width*plane_scale,plane_height*plane_scale,plane_image);
 
     // Loop to draw all intruders here
+    drawIntruders(painter);
 }

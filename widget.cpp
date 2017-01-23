@@ -8,6 +8,10 @@ Widget::Widget(QWidget *parent) :
 {
     ui->setupUi(this);
     scene = new QGraphicsScene(this);
+    ui->downButton->setVisible(false);
+    ui->leftButton->setVisible(false);
+    ui->rightButton->setVisible(false);
+    ui->upButton->setVisible(false);
 }
 
 void Widget::paintEvent(QPaintEvent *event)
@@ -34,7 +38,7 @@ void Widget::setup(){
     scene->setBackgroundBrush(greyBrush);
     radius=totalHeight*0.9/2;
 
-    SceneItems *scene_items = new SceneItems(totalWidth,totalHeight,radius);
+    scene_items = new SceneItems(totalWidth,totalHeight,radius);
     scene->addItem(scene_items);
 
     scene_manager=new SceneManager(scene_items,broadcaster);
@@ -80,9 +84,57 @@ void Widget::on_pushButton_clicked()
         ui->pushButton->setVisible(false);
         ui->label->setVisible(false);
         ui->lineEdit->setVisible(false);
+        ui->downButton->setVisible(true);
+        ui->leftButton->setVisible(true);
+        ui->rightButton->setVisible(true);
+        ui->upButton->setVisible(true);
     }
 
 }
 
+
+
+void Widget::on_leftButton_pressed()
+{
+
+}
+
+void Widget::on_downButton_pressed()
+{
+    scene_items->goDown();
+}
+
+void Widget::on_rightButton_pressed()
+{
+
+}
+
+void Widget::on_upButton_pressed()
+{
+    scene_items->goUp();
+}
+
+
+//ON Click callbacks
+
+void Widget::on_leftButton_clicked()
+{
+
+}
+
+void Widget::on_rightButton_clicked()
+{
+
+}
+
+void Widget::on_upButton_clicked()
+{
+
+}
+
+void Widget::on_downButton_clicked()
+{
+
+}
 
 
