@@ -52,7 +52,7 @@ private:
     int totalWidth;
     int totalHeight;
     qint32 radius;
-    QTimer *time;
+    QTimer *time, *send_timer;
     SceneItems *scene_items;
     SceneManager *scene_manager;
     Broadcaster *broadcaster;

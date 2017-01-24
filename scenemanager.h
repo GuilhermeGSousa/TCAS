@@ -14,6 +14,7 @@ public:
 
 public slots:
     void updateScene(char*);
+    void sendSelf();
 signals:
 private:
     SceneItems* scene_items;

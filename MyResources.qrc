@@ -5,5 +5,6 @@
         <file alias="OT">Images/OT.png</file>
         <file alias="TA">Images/TA.png</file>
         <file alias="PT">Images/PT.png</file>
+        <file alias="Indicator">Images/TCAS_indicator.png</file>
     </qresource>
 </RCC>

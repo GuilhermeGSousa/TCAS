@@ -15,3 +15,10 @@ void SceneManager::updateScene(char *buffer)
     scene_items->updateIntruders();
 }
 
+void SceneManager::sendSelf()
+{
+    char buff[BUFFSIZE];
+    broadcaster->messageToBuffer(buff,scene_items->getSelf());
+    broadcaster->sendBuffer(buff);
+}
+

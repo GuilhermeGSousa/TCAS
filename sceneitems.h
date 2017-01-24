@@ -12,8 +12,9 @@
 #include <QVector3D>
 #include <broadcaster.h>
 
-#define SPD_INCR 1.0
+#define ACC_INCR 0.00508
 #define NM2M 1852.0
+#define MPS2FPM 196.850394
 #define MAXRANGE 6.0 //In nm
 class SceneItems:public QGraphicsItem
 {
@@ -37,9 +38,10 @@ private:
     QVector3D ECEF2ENU(QVector3D);
     qreal getDistanceToSelf(Message intruder);
     qreal width,length,height;
-    qreal x1,x2,y1,y2;
-    qreal ang,intruder_scale,plane_scale;
-    QPixmap intruder_image,plane_image;
+    qreal x1,x2,y1,y2; //Line variables
+    qreal acc_z, bearing;
+    qreal ang,intruder_scale,plane_scale, indicator_scale;
+    QPixmap intruder_image,plane_image, indicator_image;
     Message self;
     QList<Message> intruder_list;
 };

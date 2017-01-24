@@ -29,14 +29,13 @@ void Widget::resizeEvent(QResizeEvent *event){
 void Widget::setup(){
 
 
-    QBrush greyBrush(Qt::gray);
     QBrush blackBrush(Qt::black);
     QPen whitePen(Qt::white);
 
     ui->graphicsView->setScene(scene);
     whitePen.setWidth(10);
-    scene->setBackgroundBrush(greyBrush);
-    radius=totalHeight*0.9/2;
+    scene->setBackgroundBrush(blackBrush);
+    radius=totalHeight*0.7/2;
 
     scene_items = new SceneItems(totalWidth,totalHeight,radius);
     scene->addItem(scene_items);
@@ -50,14 +49,20 @@ void Widget::setupListener(int portNum)
 
 
     time = new QTimer(this);
+    send_timer = new QTimer(this);
     QThread* listener = new QThread;
+
+
     scene_manager->moveToThread(listener);
     broadcaster->moveToThread(listener);
 
     connect(listener,SIGNAL(started()),broadcaster,SLOT(listenBuffer()));
     connect(broadcaster,SIGNAL(messageReceived(char*)),scene_manager,SLOT(updateScene(char*)));
     connect(time,SIGNAL(timeout()),scene,SLOT(advance()));
+    connect(send_timer,SIGNAL(timeout()),scene_manager,SLOT(sendSelf()));
+
     time->start(10);
+    send_timer->start(1000);
     listener->start();
 }
 

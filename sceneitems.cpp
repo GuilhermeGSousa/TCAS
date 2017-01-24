@@ -11,19 +11,39 @@ SceneItems::SceneItems(qreal width,qreal height,qreal length)
     x2=x1-length;
     y2=y1;
     ang=0;
+    indicator_image = QPixmap::fromImage(QImage(":/Indicator"));
     intruder_image = QPixmap::fromImage(QImage(":/PT"));
-    intruder_scale=0.5;
-
     plane_image =  QPixmap::fromImage(QImage(":/plane"));
+
+    intruder_scale=0.2;
+    plane_scale = 0.15;
+    indicator_scale=(this->height+50)/indicator_image.height();
+
 }
 
 void SceneItems::advance(int phase){
 
     //Main loop here
-
+    //Por unidades certas
     if(!phase) return;
+    self.Z_spd += acc_z*0.01;
 
-    ang=self.Z_spd*qreal(M_PI)/100.0;
+
+    self.X_pos += self.X_spd*0.01;
+    self.Y_pos += self.Y_spd*0.01;
+    self.Z_pos += self.Z_spd*0.01;
+
+
+    if(self.Z_spd>6.0/MPS2FPM){
+        self.Z_spd=6.0/MPS2FPM;
+        acc_z=0;
+    }else if(self.Z_spd<-6.0/MPS2FPM){
+        self.Z_spd=-6.0/MPS2FPM;
+        acc_z=0;
+    }
+    ang=self.Z_spd*qreal(M_PI)/(6.0/MPS2FPM);
+
+
     if(ang>qreal(M_PI))
         ang=qreal(M_PI);
     if(ang<-qreal(M_PI))
@@ -68,7 +88,7 @@ void SceneItems::drawIntruders(QPainter *painter)
     int plane_width = plane_image.width();
     int plane_height = plane_image.height();
     qreal center_x = width/2-plane_width*(plane_scale/2);
-    qreal center_y = height/2+plane_height*plane_scale*1.5;
+    qreal center_y = height/2+plane_height*plane_scale*2.0;
 
 
     foreach(Message i, intruder_list){
@@ -92,6 +112,9 @@ void SceneItems::setupSelf()
     self.X_pos = 0;
     self.Y_pos = 0;
     self.Z_pos = 0;
+    self.Z_spd = 0;
+
+    acc_z = 0.0;
 }
 
 QVector3D SceneItems::ECEF2ENU(QVector3D vec)
@@ -113,12 +136,12 @@ Message SceneItems::getSelf() const
 
 void SceneItems::goUp()
 {
-    self.Z_spd += SPD_INCR;
+    acc_z += ACC_INCR;
 }
 
 void SceneItems::goDown()
 {
-    self.Z_spd -= SPD_INCR;
+    acc_z -= ACC_INCR;
 }
 
 
@@ -149,15 +172,21 @@ void SceneItems::paint(QPainter *painter, const QStyleOptionGraphicsItem *option
     QBrush greyBrush(Qt::gray);
     whitePen.setWidth(10);
     painter->setPen(whitePen);
-    plane_scale = 0.15;
+
     int plane_width = plane_image.width();
     int plane_height = plane_image.height();
+    int indicator_width = indicator_image.width();
+    int indicator_height = indicator_image.height();
+
     const QLineF* pointer = new QLineF(x1,y1,x2,y2);
 
     //Paint Items here
+    painter->drawPixmap(width/2-indicator_width*(indicator_scale/2),
+                        height/2-indicator_height*(indicator_scale/2),
+                        indicator_width*indicator_scale,indicator_height*indicator_scale,
+                        indicator_image);
     painter->drawLine(*pointer);
-    painter->drawEllipse(width/2-length,height/2-length,length*2,length*2);
-    painter->drawPixmap(width/2-plane_width*(plane_scale/2),height/2+plane_height*plane_scale*1.5,
+    painter->drawPixmap(width/2-plane_width*(plane_scale/2),height/2+plane_height*plane_scale*2.0,
                         plane_width*plane_scale,plane_height*plane_scale,plane_image);
 
     // Loop to draw all intruders here

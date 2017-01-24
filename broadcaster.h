@@ -47,6 +47,7 @@ public:
     int sendBuffer(char *);
 public slots:
     void listenBuffer();
+
 signals:
     void messageReceived(char*);
 
