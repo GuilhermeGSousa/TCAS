@@ -149,10 +149,24 @@ void SceneItems::goDown()
 
 bool SceneItems::RA_sense(Message* i, qreal v, qreal a, qreal t)
 {
+    qreal h_up = ownAltAt(v,a,t,1);
+    qreal h_down = ownAltAt(v,a,t,-1);
+    qreal h_i = i->Z_pos + t * i->Z_spd;
+    qreal u = h_up-h_i;
+    qreal d = h_i-h_down;
 
+    if(self.Z_pos-i->Z_pos>0 && u >= alim*FT2M){
+        return true;
+    }else if(self.Z_pos-i->Z_pos<0 && d >= alim*FT2M){
+        return false;
+    }else if(u >= d){
+        return true;
+    }
+
+    return false;
 }
 
-qreal SceneItems::stopACC(qreal v, qreal a, qreal t, int sense)
+qreal SceneItems::stopAccel(qreal v, qreal a, qreal t, int sense)
 {
     if(t<=0 || sense*self.Z_spd > v)
         return 0;
@@ -162,7 +176,28 @@ qreal SceneItems::stopACC(qreal v, qreal a, qreal t, int sense)
 
 qreal SceneItems::ownAltAt(qreal v, qreal a, qreal t, int sense)
 {
-    qreal s = stopACC(v,a,t,sense);
+    qreal s = stopAccel(v,a,t,sense);
+    qreal q = qMin(t,s);
+    qreal l = qMax(0.0,(t-s));
+
+
+    return sense*q*q*a/2+q*self.Z_spd+self.Z_pos+sense*l*v;
+}
+
+bool SceneItems::correctiveRA(Message *intruder, bool sense)
+{
+    QPointF pos_rel(self.X_pos-intruder->X_pos,self.Y_pos-intruder->Y_pos);
+    QPointF vel_rel(self.X_spd-intruder->X_spd,self.Y_spd-intruder->Y_spd);
+    qreal h_rel = self.Z_pos - intruder->Z_pos;
+    qreal vz_rel = self.Z_spd - intruder->Z_spd;
+    int sign;
+    if(sense)
+        sign=1;
+    else
+        sign=-1;
+
+    return (sqrt(QPointF::dotProduct(pos_rel,pos_rel)) < dmod_RA) || (QPointF::dotProduct(vel_rel,pos_rel)<0
+                                                                      && sign*(h_rel+taumod_RA*vz_rel)<alim);
 }
 
 void SceneItems::compute_TA_RA(Message intruder)
@@ -174,8 +209,7 @@ void SceneItems::compute_TA_RA(Message intruder)
     qreal time2cpa = -(QPointF::dotProduct(pos_rel,vel_rel) / QPointF::dotProduct(vel_rel,vel_rel));
     qreal time2coa = -(self.Z_pos-intruder.Z_pos)/(self.Z_spd-intruder.Z_spd);
 
-    int sl,tau_TA,tau_RA;
-    qreal zthr_TA,zthr_RA,dmod_TA,dmod_RA,alim,taumod_TA, taumod_RA;
+
 
     //
     if(self.Z_pos*FT2M<=1000){
@@ -253,7 +287,10 @@ void SceneItems::compute_TA_RA(Message intruder)
     bool vertical_RA = (qFabs(self.Z_pos-intruder.Z_pos) <= zthr_RA) || ((self.Z_pos-intruder.Z_pos) * (self.Z_spd-intruder.Z_spd) <0
                                                                               && time2coa < tau_RA);
     if(horizontal_RA && vertical_RA){
-        RA_sense(&intruder, 1500*FT2M/60.0, 0.25*G,time2cpa);
+        bool sense = RA_sense(&intruder, 1500*FT2M/60.0, 0.25*G,taumod_RA);
+        bool isCorrective = correctiveRA(&intruder,sense);
+    }else if(){
+
     }
 }
 

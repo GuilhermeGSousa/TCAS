@@ -39,9 +39,9 @@ public:
 
 private:
     bool RA_sense(Message* i, qreal v, qreal a, qreal t);
-    qreal stopACC(qreal v, qreal a, qreal t, int sense);
+    qreal stopAccel(qreal v, qreal a, qreal t, int sense);
     qreal ownAltAt(qreal v, qreal a, qreal t, int sense);
-
+    bool correctiveRA(Message* intruder, bool sense);
     void compute_TA_RA(Message intruder);
     void rotatePointer(qreal rotation);
     bool isIdInList(int id);
@@ -52,6 +52,8 @@ private:
     qreal width,length,height;
     qreal x1,x2,y1,y2; //Line variables
     qreal acc_z, bearing;
+    int sl,tau_TA,tau_RA;
+    qreal zthr_TA,zthr_RA,dmod_TA,dmod_RA,alim,taumod_TA, taumod_RA;
     qreal ang,intruder_scale,plane_scale, indicator_scale;
     QPixmap intruder_image,plane_image, indicator_image;
     Message self;
