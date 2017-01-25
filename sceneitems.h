@@ -38,7 +38,7 @@ public:
     Message getSelf() const;
     void goUp();
     void goDown();
-    void setStart(qreal,qreal,qreal,qreal);
+    void setStart(qreal X, qreal Y, qreal Z, qreal V);
 
 private:
     bool RA_sense(Message* i, qreal v, qreal a, qreal t);

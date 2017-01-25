@@ -111,15 +111,6 @@ void SceneItems::drawIntruders(QPainter *painter)
     }
 }
 
-void SceneItems::setupSelf()
-{
-    self.X_pos = 0;
-    self.Y_pos = 0;
-    self.Z_pos = 0;
-    self.Z_spd = 0;
-
-    acc_z = 0.0;
-}
 
 QVector3D SceneItems::ECEF2ENU(QVector3D vec)
 {
@@ -145,6 +136,11 @@ void SceneItems::goUp()
 void SceneItems::goDown()
 {
     acc_z -= ACC_INCR;
+}
+
+void SceneItems::setStart(qreal X, qreal Y, qreal Z, qreal V)
+{
+//Iniciar self aqui
 }
 
 bool SceneItems::RA_sense(Message* i, qreal v, qreal a, qreal t)
