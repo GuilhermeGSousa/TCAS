@@ -111,15 +111,6 @@ void SceneItems::drawIntruders(QPainter *painter)
     }
 }
 
-void SceneItems::setupSelf()
-{
-    self.X_pos = 0;
-    self.Y_pos = 0;
-    self.Z_pos = 0;
-    self.Z_spd = 0;
-
-    acc_z = 0.0;
-}
 
 QVector3D SceneItems::ECEF2ENU(QVector3D vec)
 {
@@ -145,6 +136,18 @@ void SceneItems::goUp()
 void SceneItems::goDown()
 {
     acc_z -= ACC_INCR;
+}
+
+void SceneItems::setStart(qreal X, qreal Y, qreal Z, qreal V)
+{
+      acc_z = 0.0;
+      self.X_pos = X;
+      self.Y_pos = Y;
+      self.Z_pos = Z;
+      self.X_spd = V;
+      self.Y_spd = 0;
+      self.Z_spd = 0;
+      self.Ac_id = 0xF34C290F;
 }
 
 bool SceneItems::RA_sense(Message* i, qreal v, qreal a, qreal t)
@@ -289,7 +292,7 @@ void SceneItems::compute_TA_RA(Message intruder)
     if(horizontal_RA && vertical_RA){
         bool sense = RA_sense(&intruder, 1500*FT2M/60.0, 0.25*G,taumod_RA);
         bool isCorrective = correctiveRA(&intruder,sense);
-    }else if(){
+    }else if(true){
 
     }
 }
