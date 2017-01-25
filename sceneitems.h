@@ -11,11 +11,18 @@
 #include <QList>
 #include <QVector3D>
 #include <broadcaster.h>
+#include <QPointF>
 
 #define ACC_INCR 0.00508
 #define NM2M 1852.0
 #define MPS2FPM 196.850394
+#define FT2M 0.3048
+#define G 9.81
 #define MAXRANGE 6.0 //In nm
+
+typedef enum {TA,
+              RA
+    }Advisory;
 class SceneItems:public QGraphicsItem
 {
 
@@ -31,6 +38,11 @@ public:
     void goDown();
 
 private:
+    bool RA_sense(Message* i, qreal v, qreal a, qreal t);
+    qreal stopACC(qreal v, qreal a, qreal t, int sense);
+    qreal ownAltAt(qreal v, qreal a, qreal t, int sense);
+
+    void compute_TA_RA(Message intruder);
     void rotatePointer(qreal rotation);
     bool isIdInList(int id);
     void drawIntruders(QPainter *painter);

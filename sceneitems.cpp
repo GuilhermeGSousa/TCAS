@@ -92,18 +92,22 @@ void SceneItems::drawIntruders(QPainter *painter)
 
 
     foreach(Message i, intruder_list){
-        qreal x = i.X_pos/NM2M;
-        qreal y = i.Y_pos/NM2M;
 
-        //Limit=6nm
 
-        painter->drawPixmap(mapToParent(center_x+x*length/MAXRANGE-intruder_image.width()*intruder_scale/2,
-                                        center_y-y*length/MAXRANGE-intruder_image.height()*intruder_scale/2).x(),
-                            mapToParent(center_x+x*length/MAXRANGE-intruder_image.width()*intruder_scale/2,
-                                        center_y-length/MAXRANGE-intruder_image.height()*intruder_scale/2).y(),
-                            intruder_image.width()*intruder_scale,
-                            intruder_image.height()*intruder_scale,
-                            intruder_image);
+
+
+//        qreal x = i.X_pos/NM2M;
+//        qreal y = i.Y_pos/NM2M;
+
+//        //Limit=6nm
+
+//        painter->drawPixmap(mapToParent(center_x+x*length/MAXRANGE-intruder_image.width()*intruder_scale/2,
+//                                        center_y-y*length/MAXRANGE-intruder_image.height()*intruder_scale/2).x(),
+//                            mapToParent(center_x+x*length/MAXRANGE-intruder_image.width()*intruder_scale/2,
+//                                        center_y-length/MAXRANGE-intruder_image.height()*intruder_scale/2).y(),
+//                            intruder_image.width()*intruder_scale,
+//                            intruder_image.height()*intruder_scale,
+//                            intruder_image);
     }
 }
 
@@ -119,7 +123,6 @@ void SceneItems::setupSelf()
 
 QVector3D SceneItems::ECEF2ENU(QVector3D vec)
 {
-
 }
 
 qreal SceneItems::getDistanceToSelf(Message intruder)
@@ -142,6 +145,116 @@ void SceneItems::goUp()
 void SceneItems::goDown()
 {
     acc_z -= ACC_INCR;
+}
+
+bool SceneItems::RA_sense(Message* i, qreal v, qreal a, qreal t)
+{
+
+}
+
+qreal SceneItems::stopACC(qreal v, qreal a, qreal t, int sense)
+{
+    if(t<=0 || sense*self.Z_spd > v)
+        return 0;
+    else
+        return (sense*v-self.Z_pos)/(sense*a);
+}
+
+qreal SceneItems::ownAltAt(qreal v, qreal a, qreal t, int sense)
+{
+    qreal s = stopACC(v,a,t,sense);
+}
+
+void SceneItems::compute_TA_RA(Message intruder)
+{
+    //Self e intruder em SI
+    QPointF pos_rel(self.X_pos-intruder.X_pos,self.Y_pos-intruder.Y_pos);
+    QPointF vel_rel(self.X_spd-intruder.X_spd,self.Y_spd-intruder.Y_spd);
+
+    qreal time2cpa = -(QPointF::dotProduct(pos_rel,vel_rel) / QPointF::dotProduct(vel_rel,vel_rel));
+    qreal time2coa = -(self.Z_pos-intruder.Z_pos)/(self.Z_spd-intruder.Z_spd);
+
+    int sl,tau_TA,tau_RA;
+    qreal zthr_TA,zthr_RA,dmod_TA,dmod_RA,alim,taumod_TA, taumod_RA;
+
+    //
+    if(self.Z_pos*FT2M<=1000){
+        sl=2;
+        tau_TA = 20;//s
+        tau_RA = 0;
+        dmod_TA = 0.3;//nm
+        dmod_RA = 0;
+        zthr_TA = 850;//ft
+        zthr_RA = 0;
+        alim= 0;
+
+    }else if(self.Z_pos*FT2M<=2350){
+        sl=3;
+        tau_TA = 25;//s
+        tau_RA = 15;
+        dmod_TA = 0.33;//nm
+        dmod_RA = 0.20;
+        zthr_TA = 850;//ft
+        zthr_RA = 600;
+        alim= 300;
+    }else if(self.Z_pos*FT2M<=5000){
+        sl=4;
+        tau_TA = 30;//s
+        tau_RA = 20;
+        dmod_TA = 0.48;//nm
+        dmod_RA = 0.35;
+        zthr_TA = 850;//ft
+        zthr_RA = 600;
+        alim= 300;
+    }else if(self.Z_pos*FT2M<=10000){
+        sl=5;
+        tau_TA = 40;//s
+        tau_RA = 25;
+        dmod_TA = 0.75;//nm
+        dmod_RA = 0.55;
+        zthr_TA = 850;//ft
+        zthr_RA = 600;
+        alim= 350;
+    }else if(self.Z_pos*FT2M<=20000){
+        sl=6;
+        tau_TA = 45;//s
+        tau_RA = 30;
+        dmod_TA = 1.0;//nm
+        dmod_RA = 0.8;
+        zthr_TA = 850;//ft
+        zthr_RA = 600;
+        alim= 400;
+    }else if(self.Z_pos*FT2M<=42000){
+        sl=7;
+        tau_TA = 48;//s
+        tau_RA = 35;
+        dmod_TA = 1.3;//nm
+        dmod_RA = 1.10;
+        zthr_TA = 850;//ft
+        zthr_RA = 700;
+        alim= 600;
+    }else{
+        sl=7;
+        tau_TA = 48;//s
+        tau_RA = 35;
+        dmod_TA = 1.3;//nm
+        dmod_RA = 1.10;
+        zthr_TA = 1200;//ft
+        zthr_RA = 800;
+        alim= 700;
+    }
+
+    taumod_TA = (pow(dmod_TA*NM2M,2) - QPointF::dotProduct(pos_rel,pos_rel))/ QPointF::dotProduct(pos_rel,vel_rel);
+    taumod_RA = (pow(dmod_RA*NM2M,2) - QPointF::dotProduct(pos_rel,pos_rel))/ QPointF::dotProduct(pos_rel,vel_rel);
+
+    bool horizontal_RA = (QPointF::dotProduct(pos_rel,pos_rel) <= dmod_RA) || (QPointF::dotProduct(pos_rel,vel_rel)<0
+                                                                              && taumod_RA < tau_RA);
+
+    bool vertical_RA = (qFabs(self.Z_pos-intruder.Z_pos) <= zthr_RA) || ((self.Z_pos-intruder.Z_pos) * (self.Z_spd-intruder.Z_spd) <0
+                                                                              && time2coa < tau_RA);
+    if(horizontal_RA && vertical_RA){
+        RA_sense(&intruder, 1500*FT2M/60.0, 0.25*G,time2cpa);
+    }
 }
 
 
