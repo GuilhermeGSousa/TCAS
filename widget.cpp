@@ -12,6 +12,8 @@ Widget::Widget(QWidget *parent) :
     ui->leftButton->setVisible(false);
     ui->rightButton->setVisible(false);
     ui->upButton->setVisible(false);
+
+
 }
 
 void Widget::paintEvent(QPaintEvent *event)
@@ -86,6 +88,10 @@ void Widget::on_pushButton_clicked()
     else{
         setup();
         setupListener(ui->lineEdit->text().toInt());
+        scene_items->setStart(ui->X->text().toDouble(),
+                              ui->Y->text().toDouble(),
+                              ui->Z->text().toDouble(),
+                              ui->cruiseSpeed->text().toDouble());
         ui->pushButton->setVisible(false);
         ui->label->setVisible(false);
         ui->lineEdit->setVisible(false);
@@ -93,6 +99,14 @@ void Widget::on_pushButton_clicked()
         ui->leftButton->setVisible(true);
         ui->rightButton->setVisible(true);
         ui->upButton->setVisible(true);
+        ui->X->setVisible(false);
+        ui->Y->setVisible(false);
+        ui->Z->setVisible(false);
+        ui->cruiseSpeed->setVisible(false);
+        ui->label_2->setVisible(false);
+        ui->label_3->setVisible(false);
+        ui->label_4->setVisible(false);
+        ui->label_5->setVisible(false);
     }
 
 }

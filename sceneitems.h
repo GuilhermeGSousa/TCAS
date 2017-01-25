@@ -38,6 +38,7 @@ public:
     Message getSelf() const;
     void goUp();
     void goDown();
+    void setStart(qreal,qreal,qreal,qreal);
 
 private:
     bool RA_sense(Message* i, qreal v, qreal a, qreal t);
@@ -48,7 +49,6 @@ private:
     void rotatePointer(qreal rotation);
     bool isIdInList(int id);
     void drawIntruders(QPainter *painter);
-    void setupSelf();
     QVector3D ECEF2ENU(QVector3D);
     qreal getDistanceToSelf(Message intruder);
     qreal width,length,height;
