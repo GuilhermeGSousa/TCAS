@@ -200,7 +200,7 @@ bool SceneItems::correctiveRA(Message *intruder, bool sense)
                                                                       && sign*(h_rel+taumod_RA*vz_rel)<alim);
 }
 
-void SceneItems::compute_TA_RA(Message intruder)
+Advisory SceneItems::compute_TA_RA(Message intruder)
 {
     //Self e intruder em SI
     QPointF pos_rel(self.X_pos-intruder.X_pos,self.Y_pos-intruder.Y_pos);
@@ -281,16 +281,29 @@ void SceneItems::compute_TA_RA(Message intruder)
     taumod_TA = (pow(dmod_TA*NM2M,2) - QPointF::dotProduct(pos_rel,pos_rel))/ QPointF::dotProduct(pos_rel,vel_rel);
     taumod_RA = (pow(dmod_RA*NM2M,2) - QPointF::dotProduct(pos_rel,pos_rel))/ QPointF::dotProduct(pos_rel,vel_rel);
 
-    bool horizontal_RA = (QPointF::dotProduct(pos_rel,pos_rel) <= dmod_RA) || (QPointF::dotProduct(pos_rel,vel_rel)<0
+    bool horizontal_RA = (sqrt(QPointF::dotProduct(pos_rel,pos_rel)) <= dmod_RA*NM2M) || (QPointF::dotProduct(pos_rel,vel_rel)<0
                                                                               && taumod_RA < tau_RA);
 
-    bool vertical_RA = (qFabs(self.Z_pos-intruder.Z_pos) <= zthr_RA) || ((self.Z_pos-intruder.Z_pos) * (self.Z_spd-intruder.Z_spd) <0
+    bool vertical_RA = (qFabs(self.Z_pos-intruder.Z_pos) <= zthr_RA*FT2M) || ((self.Z_pos-intruder.Z_pos) * (self.Z_spd-intruder.Z_spd) <0
                                                                               && time2coa < tau_RA);
-    if(horizontal_RA && vertical_RA){
-        bool sense = RA_sense(&intruder, 1500*FT2M/60.0, 0.25*G,taumod_RA);
-        bool isCorrective = correctiveRA(&intruder,sense);
-    }else if(){
 
+    bool horizontal_TA = (sqrt(QPointF::dotProduct(pos_rel,pos_rel)) <= dmod_TA*NM2M) || (QPointF::dotProduct(pos_rel,vel_rel)<0
+                                                                               && taumod_TA < tau_TA);
+
+    bool vertical_TA = (qFabs(self.Z_pos-intruder.Z_pos) <= zthr_TA*FT2M) || ((self.Z_pos-intruder.Z_pos) * (self.Z_spd-intruder.Z_spd) <0
+                                                                         && time2coa < tau_TA);
+
+    if(horizontal_RA && vertical_RA) {
+        bool sense = RA_sense(&intruder, 1500 * FT2M / 60.0, 0.25 * G, taumod_RA);
+        bool isCorrective = correctiveRA(&intruder, sense);
+        // still need to compute RA sentence and strength here
+        return RA;
+    }else if((horizontal_TA || horizontal_RA) && (vertical_TA || vertical_RA)) {
+        return TA;
+    }else if(sqrt(QPointF::dotProduct(pos_rel,pos_rel))<6*NM2M && qFabs(self.Z_pos-intruder.Z_pos)<1200*FT2M) {
+        return PT;
+    }else{
+        return NT;
     }
 }
 

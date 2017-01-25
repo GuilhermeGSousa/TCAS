@@ -21,7 +21,9 @@
 #define MAXRANGE 6.0 //In nm
 
 typedef enum {TA,
-              RA
+              RA,
+              PT,
+              NT
     }Advisory;
 class SceneItems:public QGraphicsItem
 {
@@ -42,7 +44,7 @@ private:
     qreal stopAccel(qreal v, qreal a, qreal t, int sense);
     qreal ownAltAt(qreal v, qreal a, qreal t, int sense);
     bool correctiveRA(Message* intruder, bool sense);
-    void compute_TA_RA(Message intruder);
+    Advisory compute_TA_RA(Message intruder);
     void rotatePointer(qreal rotation);
     bool isIdInList(int id);
     void drawIntruders(QPainter *painter);
