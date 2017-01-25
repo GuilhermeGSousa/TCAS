@@ -141,6 +141,13 @@ void SceneItems::goDown()
 void SceneItems::setStart(qreal X, qreal Y, qreal Z, qreal V)
 {
 //Iniciar self aqui
+    self.X_pos = X;
+    self.Y_pos = Y;
+    self.Z_pos = Z;
+    self.X_spd = V;
+    self.Y_spd = 0;
+    self.Z_spd = 0;
+    self.Ac_id = 0xF34C290F;
 }
 
 bool SceneItems::RA_sense(Message* i, qreal v, qreal a, qreal t)
