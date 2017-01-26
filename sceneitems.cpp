@@ -17,7 +17,7 @@ SceneItems::SceneItems(qreal width,qreal height,qreal length)
 
     intruder_scale=0.2;
     plane_scale = 0.15;
-    indicator_scale=(this->height+50)/indicator_image.height();
+    indicator_scale=(this->height+150)/indicator_image.height();
 
 }
 
@@ -26,22 +26,24 @@ void SceneItems::advance(int phase){
     //Main loop here
     //Por unidades certas
     if(!phase) return;
-    self.Z_spd += acc_z*0.01;
+    v_z += acc_z*0.01;
+
+    llh_pos = wgs2llh(self.X_pos, self.Y_pos, self.Z_pos);
+    QVector3D wgs_spd = enu2wgs(v_x, v_y, v_z, llh_pos.x(), llh_pos.y());
+
+    self.X_pos += wgs_spd.x()*0.01;
+    self.Y_pos += wgs_spd.y()*0.01;
+    self.Z_pos += wgs_spd.z()*0.01;
 
 
-    self.X_pos += self.X_spd*0.01;
-    self.Y_pos += self.Y_spd*0.01;
-    self.Z_pos += self.Z_spd*0.01;
-
-
-    if(self.Z_spd>6.0/MPS2FPM){
-        self.Z_spd=6.0/MPS2FPM;
+    if(v_z > MAXVSPD/MPS2FPM){
+        v_z= MAXVSPD/MPS2FPM;
         acc_z=0;
-    }else if(self.Z_spd<-6.0/MPS2FPM){
-        self.Z_spd=-6.0/MPS2FPM;
+    }else if(v_z < -MAXVSPD/MPS2FPM){
+        v_z =-MAXVSPD/MPS2FPM;
         acc_z=0;
     }
-    ang=self.Z_spd*qreal(M_PI)/(6.0/MPS2FPM);
+    ang=v_z*qreal(M_PI)/(MAXVSPD/MPS2FPM);
 
 
     if(ang>qreal(M_PI))
@@ -87,34 +89,48 @@ void SceneItems::drawIntruders(QPainter *painter)
 
     int plane_width = plane_image.width();
     int plane_height = plane_image.height();
-    qreal center_x = width/2-plane_width*(plane_scale/2);
-    qreal center_y = height/2+plane_height*plane_scale*2.0;
+    qreal center_x = width/2;
+    qreal center_y = height-plane_height*plane_scale*2.5;
 
 
     foreach(Message i, intruder_list){
 
+        QVector3D me(self.X_pos,
+                     self.Y_pos,
+                     self.Z_pos);
+        QVector3D intr(i.X_pos,
+                       i.Y_pos,
+                       i.Z_pos);
+
+
+        me = wgs2enu(me.x(),me.y(),me.z(),llh_pos.x(),llh_pos.y());
+        intr = wgs2enu(intr.x(),intr.y(),intr.z(),llh_pos.x(),llh_pos.y());
+
+        QVector3D intr_rel=intr-me;
+        qreal dist = intr_rel.distanceToPoint(QVector3D(0,0,0));
+        //Change to our frame of ref
+        intr_rel.setX(intr_rel.x()*cos(bearing*qreal(M_PI)/180.0)+intr_rel.y()*sin(bearing*qreal(M_PI)/180.0));
+        intr_rel.setY(-intr_rel.x()*sin(bearing*qreal(M_PI)/180.0)+intr_rel.y()*cos(bearing*qreal(M_PI)/180.0));
+
+
+        qreal x = intr_rel.x()/NM2M;
+        qreal y = intr_rel.y()/NM2M;
+        qDebug()<<y;
 
 
 
-//        qreal x = i.X_pos/NM2M;
-//        qreal y = i.Y_pos/NM2M;
+        //Limit=6nm
 
-//        //Limit=6nm
+        painter->drawPixmap(center_x+x*length/MAXRANGE-intruder_image.width()*intruder_scale/2,
+                            center_y-y*length/MAXRANGE-intruder_image.height()*intruder_scale/2,
+                            intruder_image.width()*intruder_scale,
+                            intruder_image.height()*intruder_scale,
+                            intruder_image);
 
-//        painter->drawPixmap(mapToParent(center_x+x*length/MAXRANGE-intruder_image.width()*intruder_scale/2,
-//                                        center_y-y*length/MAXRANGE-intruder_image.height()*intruder_scale/2).x(),
-//                            mapToParent(center_x+x*length/MAXRANGE-intruder_image.width()*intruder_scale/2,
-//                                        center_y-length/MAXRANGE-intruder_image.height()*intruder_scale/2).y(),
-//                            intruder_image.width()*intruder_scale,
-//                            intruder_image.height()*intruder_scale,
-//                            intruder_image);
     }
 }
 
 
-QVector3D SceneItems::ECEF2ENU(QVector3D vec)
-{
-}
 
 qreal SceneItems::getDistanceToSelf(Message intruder)
 {
@@ -138,16 +154,46 @@ void SceneItems::goDown()
     acc_z -= ACC_INCR;
 }
 
+void SceneItems::goLeft()
+{
+    bearing += 1.0;
+    //Update vel
+    v_y = VCRUISE * cos(bearing*qreal(M_PI)/180.0);
+    v_x = VCRUISE * sin(bearing*qreal(M_PI)/180.0);
+}
+
+void SceneItems::goRight()
+{
+    bearing -= 1.0;
+    //Update vel
+    v_y = VCRUISE * cos(bearing*qreal(M_PI)/180.0);
+    v_x = VCRUISE * sin(bearing*qreal(M_PI)/180.0);
+}
+
 void SceneItems::setStart(qreal X, qreal Y, qreal Z, qreal V)
 {
 //Iniciar self aqui
-    self.X_pos = X;
-    self.Y_pos = Y;
-    self.Z_pos = Z;
-    self.X_spd = V;
-    self.Y_spd = 0;
-    self.Z_spd = 0;
+    bearing = 0;
+    QVector3D wgs_pos = llh2wgs(X * qreal(M_PI/180.0),Y * qreal(M_PI/180.0),Z);
+    v_x=0;
+    v_y=VCRUISE;
+    v_z=0;
+    QVector3D wgs_spd = enu2wgs(v_x,v_y,v_z,X * qreal(M_PI/180.0),Y * qreal(M_PI/180.0));
+
+
+    self.X_pos = wgs_pos.x();
+    self.Y_pos = wgs_pos.y();
+    self.Z_pos = wgs_pos.z();
+
+
+    //Speed here
+    self.X_spd = wgs_spd.x();
+    self.Y_spd = wgs_spd.y();
+    self.Z_spd = wgs_spd.z();
+
     self.Ac_id = 0xF34C290F;
+
+
 }
 
 bool SceneItems::RA_sense(Message* i, qreal v, qreal a, qreal t)
@@ -352,7 +398,7 @@ void SceneItems::paint(QPainter *painter, const QStyleOptionGraphicsItem *option
                         indicator_width*indicator_scale,indicator_height*indicator_scale,
                         indicator_image);
     painter->drawLine(*pointer);
-    painter->drawPixmap(width/2-plane_width*(plane_scale/2),height/2+plane_height*plane_scale*2.0,
+    painter->drawPixmap(width/2-plane_width*(plane_scale/2),height-plane_height*plane_scale*2.5,
                         plane_width*plane_scale,plane_height*plane_scale,plane_image);
 
     // Loop to draw all intruders here

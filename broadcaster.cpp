@@ -231,7 +231,7 @@ Message Broadcaster::bufferToMessage(char buffer[BUFFSIZE]){
     {
         aux[i]=buffer[i+index];
     }index+=8;
-    out.Z_pos = bufferToDouble(aux);
+    out.Z_spd = bufferToDouble(aux);
 
     //TCAS status
     for (int i = 0; i < 16; ++i)

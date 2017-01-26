@@ -11,6 +11,7 @@ SceneManager::SceneManager(SceneItems *scene_input,Broadcaster *b)
 void SceneManager::updateScene(char *buffer)
 {
     Message m = broadcaster->bufferToMessage(buffer);
+
     scene_items->addIntruder(m);
     scene_items->updateIntruders();
 }

@@ -88,10 +88,12 @@ void Widget::on_pushButton_clicked()
     else{
         setup();
         setupListener(ui->lineEdit->text().toInt());
+
         scene_items->setStart(ui->X->text().toDouble(),
                               ui->Y->text().toDouble(),
                               ui->Z->text().toDouble(),
                               ui->cruiseSpeed->text().toDouble());
+
         ui->pushButton->setVisible(false);
         ui->label->setVisible(false);
         ui->lineEdit->setVisible(false);
@@ -115,7 +117,7 @@ void Widget::on_pushButton_clicked()
 
 void Widget::on_leftButton_pressed()
 {
-
+    scene_items->goLeft();
 }
 
 void Widget::on_downButton_pressed()
@@ -125,7 +127,7 @@ void Widget::on_downButton_pressed()
 
 void Widget::on_rightButton_pressed()
 {
-
+    scene_items->goRight();
 }
 
 void Widget::on_upButton_pressed()

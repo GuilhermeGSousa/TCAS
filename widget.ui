@@ -97,7 +97,7 @@
       <string>Port Number</string>
      </property>
      <property name="text">
-      <string>8228</string>
+      <string>7891</string>
      </property>
     </widget>
    </item>
@@ -120,12 +120,16 @@
    <item row="3" column="1">
     <widget class="QLabel" name="label_2">
      <property name="text">
-      <string>X (m)</string>
+      <string>Latitude</string>
      </property>
     </widget>
    </item>
    <item row="4" column="2">
-    <widget class="QLineEdit" name="Y"/>
+    <widget class="QLineEdit" name="Y">
+     <property name="text">
+      <string>-9.0</string>
+     </property>
+    </widget>
    </item>
    <item row="6" column="0">
     <spacer name="horizontalSpacer_4">
@@ -156,20 +160,28 @@
    <item row="3" column="2">
     <widget class="QLabel" name="label_3">
      <property name="text">
-      <string>Y (m)</string>
+      <string>Longitude</string>
      </property>
     </widget>
    </item>
    <item row="4" column="1">
-    <widget class="QLineEdit" name="X"/>
+    <widget class="QLineEdit" name="X">
+     <property name="text">
+      <string>38.65</string>
+     </property>
+    </widget>
    </item>
    <item row="4" column="3">
-    <widget class="QLineEdit" name="Z"/>
+    <widget class="QLineEdit" name="Z">
+     <property name="text">
+      <string>1000</string>
+     </property>
+    </widget>
    </item>
    <item row="3" column="3">
     <widget class="QLabel" name="label_4">
      <property name="text">
-      <string>Z (m)</string>
+      <string>Altitude</string>
      </property>
     </widget>
    </item>

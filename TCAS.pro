@@ -16,12 +16,14 @@ SOURCES += main.cpp\
         widget.cpp \
     broadcaster.cpp \
     scenemanager.cpp \
-    sceneitems.cpp
+    sceneitems.cpp \
+    conversions.cpp
 
 HEADERS  += widget.h \
     broadcaster.h \
     scenemanager.h \
-    sceneitems.h
+    sceneitems.h \
+    conversions.h
 
 FORMS    += widget.ui
 

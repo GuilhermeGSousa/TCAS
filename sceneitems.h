@@ -3,7 +3,6 @@
 
 #include <QWidget>
 #include <QGraphicsLineItem>
-#include <QtMath>
 #include <QPainter>
 #include <QGraphicsScene>
 #include <QPixmap>
@@ -12,13 +11,13 @@
 #include <QVector3D>
 #include <broadcaster.h>
 #include <QPointF>
+#include "conversions.h"
 
-#define ACC_INCR 0.00508
-#define NM2M 1852.0
-#define MPS2FPM 196.850394
-#define FT2M 0.3048
-#define G 9.81
 #define MAXRANGE 6.0 //In nm
+#define MAXVSPD 6000.0 //Ft/min
+#define VCRUISE 300.0 //m/s
+#define G 9.81
+#define ACC_INCR 5.08 //1000Ft/min/s?
 
 typedef enum {TA,
               RA,
@@ -38,6 +37,8 @@ public:
     Message getSelf() const;
     void goUp();
     void goDown();
+    void goLeft();
+    void goRight();
     void setStart(qreal X, qreal Y, qreal Z, qreal V);
 
 private:
@@ -49,11 +50,11 @@ private:
     void rotatePointer(qreal rotation);
     bool isIdInList(int id);
     void drawIntruders(QPainter *painter);
-    QVector3D ECEF2ENU(QVector3D);
+    QVector3D llh_pos;
     qreal getDistanceToSelf(Message intruder);
     qreal width,length,height;
     qreal x1,x2,y1,y2; //Line variables
-    qreal acc_z, bearing;
+    qreal acc_z, v_x, v_y, v_z, bearing; //Bearing in degrees, acc and speeds in enu for display, convert on send
     int sl,tau_TA,tau_RA;
     qreal zthr_TA,zthr_RA,dmod_TA,dmod_RA,alim,taumod_TA, taumod_RA;
     qreal ang,intruder_scale,plane_scale, indicator_scale;
