@@ -12,7 +12,11 @@ SceneItems::SceneItems(qreal width,qreal height,qreal length)
     y2=y1;
     ang=0;
     indicator_image = QPixmap::fromImage(QImage(":/Indicator"));
-    intruder_image = QPixmap::fromImage(QImage(":/PT"));
+    PT_image = QPixmap::fromImage(QImage(":/PT"));
+    TA_image = QPixmap::fromImage(QImage(":/TA"));
+    RA_image = QPixmap::fromImage(QImage(":/RA"));
+    OT_image = QPixmap::fromImage(QImage(":/OT"));
+
     plane_image =  QPixmap::fromImage(QImage(":/plane"));
 
     intruder_scale=0.2;
@@ -52,6 +56,7 @@ void SceneItems::advance(int phase){
         ang=-qreal(M_PI);
 
     rotatePointer(ang);
+
 
 
 }
@@ -107,7 +112,6 @@ void SceneItems::drawIntruders(QPainter *painter)
 
         QVector3D intr_rel=intr-me;
         qreal dist = intr_rel.distanceToPoint(QVector3D(0,0,0));
-        qDebug()<<dist/NM2M;
         //Change to our frame of ref
         //Rever matrizes de rotação!
         intr_rel.setX(intr_rel.x()*cos(bearing*qreal(M_PI)/180.0)-intr_rel.y()*sin(bearing*qreal(M_PI)/180.0));
@@ -119,15 +123,50 @@ void SceneItems::drawIntruders(QPainter *painter)
 
 
 
+        Advisory threat_level = issue_TA_RA(&i);
+        advanceStatus(&i,threat_level);
+        qDebug()<<self.Resolution_val;
+        switch (threat_level) {
+        case TA:
+            painter->drawPixmap(center_x+x*length/MAXRANGE-PT_image.width()*intruder_scale/2,
+                                center_y-y*length/MAXRANGE-PT_image.height()*intruder_scale/2,
+                                PT_image.width()*intruder_scale,
+                                PT_image.height()*intruder_scale,
+                                TA_image);
+            break;
+        case RA:
+            painter->drawPixmap(center_x+x*length/MAXRANGE-PT_image.width()*intruder_scale/2,
+                                center_y-y*length/MAXRANGE-PT_image.height()*intruder_scale/2,
+                                PT_image.width()*intruder_scale,
+                                PT_image.height()*intruder_scale,
+                                RA_image);
+            break;
+        case PT:
+            painter->drawPixmap(center_x+x*length/MAXRANGE-PT_image.width()*intruder_scale/2,
+                                center_y-y*length/MAXRANGE-PT_image.height()*intruder_scale/2,
+                                PT_image.width()*intruder_scale,
+                                PT_image.height()*intruder_scale,
+                                PT_image);
+            break;
+        case OT:
+            painter->drawPixmap(center_x+x*length/MAXRANGE-PT_image.width()*intruder_scale/2,
+                                center_y-y*length/MAXRANGE-PT_image.height()*intruder_scale/2,
+                                PT_image.width()*intruder_scale,
+                                PT_image.height()*intruder_scale,
+                                OT_image);
+            break;
+        }
 
-
-        painter->drawPixmap(center_x+x*length/MAXRANGE-intruder_image.width()*intruder_scale/2,
-                            center_y-y*length/MAXRANGE-intruder_image.height()*intruder_scale/2,
-                            intruder_image.width()*intruder_scale,
-                            intruder_image.height()*intruder_scale,
-                            intruder_image);
 
     }
+}
+
+void SceneItems::drawTarget(QPainter *painter, qreal v_target)
+{
+    QPen pen(Qt::green);
+    pen.setWidth(25);
+    painter->setPen(pen);
+    painter->drawArc(width/2-390,height/2-350,780,700,0,5695);
 }
 
 
@@ -350,7 +389,7 @@ Advisory SceneItems::issue_TA_RA(Message *intruder)
     }else if(sqrt(QPointF::dotProduct(pos_rel,pos_rel))<6*NM2M && qFabs(self.Z_pos-intruder->Z_pos)<1200*FT2M) {
         return PT;
     }else{
-        return NT;
+        return OT;
     }
 }
 
@@ -402,7 +441,7 @@ void SceneItems::advanceStatus(Message *intruder, Advisory result){
             }else {
                 strcpy(self.TCAS_status,"ADVISORY");
             }break;
-        case NT:
+        case OT:
         case PT:
             strcpy(self.TCAS_status,"CLEAR");
             break;
@@ -489,6 +528,8 @@ void SceneItems::paint(QPainter *painter, const QStyleOptionGraphicsItem *option
     painter->drawPixmap(width/2-plane_width*(plane_scale/2),height-plane_height*plane_scale*2.5,
                         plane_width*plane_scale,plane_height*plane_scale,plane_image);
 
+
     // Loop to draw all intruders here
+    drawTarget(painter,0);
     drawIntruders(painter);
 }

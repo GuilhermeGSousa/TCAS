@@ -11,6 +11,7 @@
 #include <QVector3D>
 #include <broadcaster.h>
 #include <QPointF>
+#include <QString>
 #include "conversions.h"
 
 #define MAXRANGE 6.0 //In nm
@@ -22,7 +23,7 @@
 typedef enum {TA,
               RA,
               PT,
-              NT
+              OT
     }Advisory;
 class SceneItems:public QGraphicsItem
 {
@@ -55,6 +56,7 @@ private:
     void rotatePointer(qreal rotation);
     bool isIdInList(int id);
     void drawIntruders(QPainter *painter);
+    void drawTarget(QPainter *painter, qreal v_target);
     QVector3D llh_pos;
     qreal getDistanceToSelf(Message intruder);
     qreal width,length,height;
@@ -64,7 +66,7 @@ private:
     int sl,tau_TA,tau_RA;
     qreal zthr_TA,zthr_RA,dmod_TA,dmod_RA,alim,taumod_TA, taumod_RA;
     qreal ang,intruder_scale,plane_scale, indicator_scale;
-    QPixmap intruder_image,plane_image, indicator_image;
+    QPixmap PT_image, TA_image, OT_image, RA_image, plane_image, indicator_image;
     Message self;
     QList<Message> intruder_list;
 };
