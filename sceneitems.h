@@ -46,10 +46,10 @@ private:
     qreal stopAccel(qreal v, qreal a, qreal t, int sense);
     qreal ownAltAt(qreal v, qreal a, qreal t, int sense);
     bool correctiveRA(Message* intruder, int sense);
-    void computeTCAStimes(Message* intruder, qreal* t2cpa, qreal* t2coa);
+    void computeTCAStimes(Message* intruder, qreal* t2cpa, qreal* t2coa, QPointF* pos_rel, QPointF* vel_rel);
     Advisory issue_TA_RA(Message* intruder);
     void complementResolutions(Message* intruder);
-    void areResolutionsComplementary(Message* intruder);
+    bool areResolutionsComplementary(Message* intruder);
     void computeResolutionStrength(Message* intruder);
     void advanceStatus(Message* intruder, Advisory result);
     void rotatePointer(qreal rotation);
