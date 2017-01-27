@@ -42,11 +42,16 @@ public:
     void setStart(qreal X, qreal Y, qreal Z, qreal V);
 
 private:
-    bool RA_sense(Message* i, qreal v, qreal a, qreal t);
+    int RA_sense(Message* i, qreal v, qreal a, qreal t);
     qreal stopAccel(qreal v, qreal a, qreal t, int sense);
     qreal ownAltAt(qreal v, qreal a, qreal t, int sense);
-    bool correctiveRA(Message* intruder, bool sense);
-    Advisory compute_TA_RA(Message intruder);
+    bool correctiveRA(Message* intruder, int sense);
+    void computeTCAStimes(Message* intruder, qreal* t2cpa, qreal* t2coa);
+    Advisory issue_TA_RA(Message* intruder);
+    void complementResolutions(Message* intruder);
+    void areResolutionsComplementary(Message* intruder);
+    void computeResolutionStrength(Message* intruder);
+    void advanceStatus(Message* intruder, Advisory result);
     void rotatePointer(qreal rotation);
     bool isIdInList(int id);
     void drawIntruders(QPainter *painter);
