@@ -197,7 +197,9 @@ void SceneItems::setStart(qreal X, qreal Y, qreal Z, qreal V)
 
 }
 
-bool SceneItems::RA_sense(Message* i, qreal v, qreal a, qreal t)
+//afonso stuff
+
+int SceneItems::RA_sense(Message* i, qreal v, qreal a, qreal t)
 {
     qreal h_up = ownAltAt(v,a,t,1);
     qreal h_down = ownAltAt(v,a,t,-1);
@@ -206,22 +208,22 @@ bool SceneItems::RA_sense(Message* i, qreal v, qreal a, qreal t)
     qreal d = h_i-h_down;
 
     if(self.Z_pos-i->Z_pos>0 && u >= alim*FT2M){
-        return true;
+        return 1;
     }else if(self.Z_pos-i->Z_pos<0 && d >= alim*FT2M){
-        return false;
+        return -1;
     }else if(u >= d){
-        return true;
+        return 1;
+    }else {
+        return -1;
     }
-
-    return false;
 }
 
 qreal SceneItems::stopAccel(qreal v, qreal a, qreal t, int sense)
 {
-    if(t<=0 || sense*self.Z_spd > v)
+    if(t<=0 || sense*self.Z_spd >= v)
         return 0;
     else
-        return (sense*v-self.Z_pos)/(sense*a);
+        return (sense*v-self.Z_spd)/(sense*a);
 }
 
 qreal SceneItems::ownAltAt(qreal v, qreal a, qreal t, int sense)
@@ -230,36 +232,33 @@ qreal SceneItems::ownAltAt(qreal v, qreal a, qreal t, int sense)
     qreal q = qMin(t,s);
     qreal l = qMax(0.0,(t-s));
 
-
     return sense*q*q*a/2+q*self.Z_spd+self.Z_pos+sense*l*v;
 }
 
-bool SceneItems::correctiveRA(Message *intruder, bool sense)
+bool SceneItems::correctiveRA(Message *intruder, int sense)
 {
     QPointF pos_rel(self.X_pos-intruder->X_pos,self.Y_pos-intruder->Y_pos);
     QPointF vel_rel(self.X_spd-intruder->X_spd,self.Y_spd-intruder->Y_spd);
     qreal h_rel = self.Z_pos - intruder->Z_pos;
     qreal vz_rel = self.Z_spd - intruder->Z_spd;
-    int sign;
-    if(sense)
-        sign=1;
-    else
-        sign=-1;
 
     return (sqrt(QPointF::dotProduct(pos_rel,pos_rel)) < dmod_RA) || (QPointF::dotProduct(vel_rel,pos_rel)<0
-                                                                      && sign*(h_rel+taumod_RA*vz_rel)<alim);
+                                                                      && sense*(h_rel+taumod_RA*vz_rel)<alim*FT2M);
 }
 
-Advisory SceneItems::compute_TA_RA(Message intruder)
+void SceneItems::computeTCAStimes(Message *intruder, qreal *t2cpa, qreal *t2coa){
+    QPointF pos_rel(self.X_pos-intruder->X_pos,self.Y_pos-intruder->Y_pos);
+    QPointF vel_rel(self.X_spd-intruder->X_spd,self.Y_spd-intruder->Y_spd);
+
+    *t2cpa = -(QPointF::dotProduct(pos_rel,vel_rel) / QPointF::dotProduct(vel_rel,vel_rel));
+    *t2coa = -(self.Z_pos-intruder->Z_pos)/(self.Z_spd-intruder->Z_spd);
+}
+
+Advisory SceneItems::issue_TA_RA(Message *intruder)
 {
     //Self e intruder em SI
-    QPointF pos_rel(self.X_pos-intruder.X_pos,self.Y_pos-intruder.Y_pos);
-    QPointF vel_rel(self.X_spd-intruder.X_spd,self.Y_spd-intruder.Y_spd);
-
-    qreal time2cpa = -(QPointF::dotProduct(pos_rel,vel_rel) / QPointF::dotProduct(vel_rel,vel_rel));
-    qreal time2coa = -(self.Z_pos-intruder.Z_pos)/(self.Z_spd-intruder.Z_spd);
-
-
+    qreal time2cpa, time2coa;
+    computeTCAStimes(intruder, &time2cpa, &time2coa);
 
     //
     if(self.Z_pos*FT2M<=1000){
@@ -332,31 +331,116 @@ Advisory SceneItems::compute_TA_RA(Message intruder)
     taumod_RA = (pow(dmod_RA*NM2M,2) - QPointF::dotProduct(pos_rel,pos_rel))/ QPointF::dotProduct(pos_rel,vel_rel);
 
     bool horizontal_RA = (sqrt(QPointF::dotProduct(pos_rel,pos_rel)) <= dmod_RA*NM2M) || (QPointF::dotProduct(pos_rel,vel_rel)<0
-                                                                              && taumod_RA < tau_RA);
+                                                                                          && taumod_RA < tau_RA);
 
-    bool vertical_RA = (qFabs(self.Z_pos-intruder.Z_pos) <= zthr_RA*FT2M) || ((self.Z_pos-intruder.Z_pos) * (self.Z_spd-intruder.Z_spd) <0
-                                                                              && time2coa < tau_RA);
+    bool vertical_RA = (qFabs(self.Z_pos-intruder->Z_pos) <= zthr_RA*FT2M) || ((self.Z_pos-intruder->Z_pos) * (self.Z_spd-intruder->Z_spd) <0
+                                                                               && time2coa < tau_RA);
 
     bool horizontal_TA = (sqrt(QPointF::dotProduct(pos_rel,pos_rel)) <= dmod_TA*NM2M) || (QPointF::dotProduct(pos_rel,vel_rel)<0
-                                                                               && taumod_TA < tau_TA);
+                                                                                          && taumod_TA < tau_TA);
 
-    bool vertical_TA = (qFabs(self.Z_pos-intruder.Z_pos) <= zthr_TA*FT2M) || ((self.Z_pos-intruder.Z_pos) * (self.Z_spd-intruder.Z_spd) <0
-                                                                         && time2coa < tau_TA);
+    bool vertical_TA = (qFabs(self.Z_pos-intruder->Z_pos) <= zthr_TA*FT2M) || ((self.Z_pos-intruder->Z_pos) * (self.Z_spd-intruder->Z_spd) <0
+                                                                               && time2coa < tau_TA);
 
     if(horizontal_RA && vertical_RA) {
-        bool sense = RA_sense(&intruder, 1500 * FT2M / 60.0, 0.25 * G, taumod_RA);
-        bool isCorrective = correctiveRA(&intruder, sense);
-        // still need to compute RA sentence and strength here
         return RA;
     }else if((horizontal_TA || horizontal_RA) && (vertical_TA || vertical_RA)) {
         return TA;
-    }else if(sqrt(QPointF::dotProduct(pos_rel,pos_rel))<6*NM2M && qFabs(self.Z_pos-intruder.Z_pos)<1200*FT2M) {
+    }else if(sqrt(QPointF::dotProduct(pos_rel,pos_rel))<6*NM2M && qFabs(self.Z_pos-intruder->Z_pos)<1200*FT2M) {
         return PT;
     }else{
         return NT;
     }
 }
 
+void SceneItems::complementResolutions(Message *intruder){
+    if (!strcmp(intruder->Resolution,"CLIMB")){
+        self.Resolution = "DESCEND";
+    }else{
+        self.Resolution = "CLIMB";
+    }
+}
+
+bool SceneItems::areResolutionsComplementary(Message *intruder){
+    if (!strcmp(intruder->Resolution,self.Resolution)){
+        return false;
+    }else{
+        return true;
+    }
+}
+
+void SceneItems::computeResolutionStrength(Message *intruder){
+    // We know the resolution sense by now
+    // Assume intruder keeps his current path and loop to check
+    // which vertical speed will allow us to obtain the separation ALIM at CPA
+    int sense;
+    int inc = 30;
+    qreal target_diff=alim*FT2M;
+    double target_v;
+    if (!strcmp(self.Resolution,"CLIMB")){sense=1;
+    }else{sense=-1;}
+    if (sense*self.Z_spd>0){target_v=self.Z_spd-inc;
+    }else{target_v=-inc;}
+    qreal h_at_cpa, h_diff;
+    do{
+        target_v += inc;
+        h_at_cpa = ownAltAt(target_v,0.25*G,taumod_RA,sense);
+        h_diff = h_at_cpa - (intruder->Z_pos + taumod_RA * intruder->Z_spd);
+    }while(qFabs(h_diff)<target_diff);
+    self.Resolution_val = target_v;
+}
+
+
+void SceneItems::advanceStatus(Message *intruder, Advisory result){
+
+    //result=TA/RA/NT/PT
+    switch(result){
+        case TA:
+            if (!strcmp(self.TCAS_status,"RESOLVING") || !strcmp(self.TCAS_status,"RETURNING")){
+                self.TCAS_status = "RETURNING";
+            }else {
+                self.TCAS_status = "ADVISORY";
+            }break;
+        case NT:
+        case PT:
+            self.TCAS_status = "CLEAR";
+            break;
+        case RA:
+            if (!strcmp(self.TCAS_status,"CLEAR") || !strcmp(self.TCAS_status,"ADVISORY")){
+                if (!strcmp(intruder->TCAS_status,"RESOLVING")){
+                    complementResolutions(intruder);
+                    computeResolutionStrength(intruder);
+                }else{
+                    int sense = RA_sense(intruder, 1500 * FT2M / 60.0, 0.25 * G, taumod_RA);
+                    if (sense==1){self.Resolution="CLIMB";
+                    }else{ self.Resolution="DESCEND";}
+                    computeResolutionStrength(intruder);
+                }
+                self.TCAS_status = "RESOLVING";
+            }else if(!strcmp(self.TCAS_status,"RESOLVING") && !strcmp(intruder->TCAS_status,"RESOLVING")){
+                bool diff_resolutions = areResolutionsComplementary(intruder);
+                if (!diff_resolutions && self.Ac_id < intruder->Ac_id){
+                    complementResolutions(intruder);
+                    computeResolutionStrength(intruder);
+                }
+            }
+    }
+    //if result is TA, several cases
+    //if RESOLVING or RETURNING, status is set to RETURNING
+    //else, set to ADVISORY
+    //if result is NT or PT, status is set to CLEAR
+    //if result is RA, we have several cases
+    //if our status is CLEAR or ADVISORY, several cases
+    //check if intruder is RESOLVING.
+    //if he is, complement and set RESOLVING
+    // if he is not, compute and set RESOLVING
+    //if our status is RESOLVING and intruder also
+    //check if actions are complementary
+    //if they are not, check if we have lower id
+    //if we do, complement the action
+}
+
+// no longer afonso stuff
 
 
 void SceneItems::rotatePointer(qreal rotation){
