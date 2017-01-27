@@ -26,24 +26,24 @@ void SceneItems::advance(int phase){
     //Main loop here
     //Por unidades certas
     if(!phase) return;
-    v_z += acc_z*0.01;
+    v_U += acc_z*0.01;
 
     llh_pos = wgs2llh(self.X_pos, self.Y_pos, self.Z_pos);
-    QVector3D wgs_spd = enu2wgs(v_x, v_y, v_z, llh_pos.x(), llh_pos.y());
+    QVector3D wgs_spd = enu2wgs(v_E, v_N, v_U, llh_pos.x(), llh_pos.y());
 
     self.X_pos += wgs_spd.x()*0.01;
     self.Y_pos += wgs_spd.y()*0.01;
     self.Z_pos += wgs_spd.z()*0.01;
 
 
-    if(v_z > MAXVSPD/MPS2FPM){
-        v_z= MAXVSPD/MPS2FPM;
+    if(v_U > MAXVSPD/MPS2FPM){
+        v_U= MAXVSPD/MPS2FPM;
         acc_z=0;
-    }else if(v_z < -MAXVSPD/MPS2FPM){
-        v_z =-MAXVSPD/MPS2FPM;
+    }else if(v_U < -MAXVSPD/MPS2FPM){
+        v_U =-MAXVSPD/MPS2FPM;
         acc_z=0;
     }
-    ang=v_z*qreal(M_PI)/(MAXVSPD/MPS2FPM);
+    ang=v_U*qreal(M_PI)/(MAXVSPD/MPS2FPM);
 
 
     if(ang>qreal(M_PI))
@@ -87,7 +87,6 @@ bool SceneItems::isIdInList(int id)
 void SceneItems::drawIntruders(QPainter *painter)
 {
 
-    int plane_width = plane_image.width();
     int plane_height = plane_image.height();
     qreal center_x = width/2;
     qreal center_y = height-plane_height*plane_scale*2.5;
@@ -108,14 +107,15 @@ void SceneItems::drawIntruders(QPainter *painter)
 
         QVector3D intr_rel=intr-me;
         qreal dist = intr_rel.distanceToPoint(QVector3D(0,0,0));
+        qDebug()<<dist/NM2M;
         //Change to our frame of ref
-        intr_rel.setX(intr_rel.x()*cos(bearing*qreal(M_PI)/180.0)+intr_rel.y()*sin(bearing*qreal(M_PI)/180.0));
-        intr_rel.setY(-intr_rel.x()*sin(bearing*qreal(M_PI)/180.0)+intr_rel.y()*cos(bearing*qreal(M_PI)/180.0));
+        //Rever matrizes de rotação!
+        intr_rel.setX(intr_rel.x()*cos(bearing*qreal(M_PI)/180.0)-intr_rel.y()*sin(bearing*qreal(M_PI)/180.0));
+        intr_rel.setY(intr_rel.x()*sin(bearing*qreal(M_PI)/180.0)+intr_rel.y()*cos(bearing*qreal(M_PI)/180.0));
 
 
         qreal x = intr_rel.x()/NM2M;
         qreal y = intr_rel.y()/NM2M;
-        qDebug()<<y;
 
 
 
@@ -156,18 +156,18 @@ void SceneItems::goDown()
 
 void SceneItems::goLeft()
 {
-    bearing += 1.0;
+    bearing -= DEGINC;
     //Update vel
-    v_y = VCRUISE * cos(bearing*qreal(M_PI)/180.0);
-    v_x = VCRUISE * sin(bearing*qreal(M_PI)/180.0);
+    v_N = vmax * cos(bearing*qreal(M_PI)/180.0);
+    v_E = vmax * sin(bearing*qreal(M_PI)/180.0);
 }
 
 void SceneItems::goRight()
 {
-    bearing -= 1.0;
+    bearing += DEGINC;
     //Update vel
-    v_y = VCRUISE * cos(bearing*qreal(M_PI)/180.0);
-    v_x = VCRUISE * sin(bearing*qreal(M_PI)/180.0);
+    v_N = vmax * cos(bearing*qreal(M_PI)/180.0);
+    v_E = vmax * sin(bearing*qreal(M_PI)/180.0);
 }
 
 void SceneItems::setStart(qreal X, qreal Y, qreal Z, qreal V)
@@ -175,10 +175,11 @@ void SceneItems::setStart(qreal X, qreal Y, qreal Z, qreal V)
 //Iniciar self aqui
     bearing = 0;
     QVector3D wgs_pos = llh2wgs(X * qreal(M_PI/180.0),Y * qreal(M_PI/180.0),Z);
-    v_x=0;
-    v_y=VCRUISE;
-    v_z=0;
-    QVector3D wgs_spd = enu2wgs(v_x,v_y,v_z,X * qreal(M_PI/180.0),Y * qreal(M_PI/180.0));
+    v_E=0;
+    vmax=V;
+    v_N=V;
+    v_U=0;
+    QVector3D wgs_spd = enu2wgs(v_E,v_N,v_U,X * qreal(M_PI/180.0),Y * qreal(M_PI/180.0));
 
 
     self.X_pos = wgs_pos.x();

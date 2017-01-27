@@ -115,7 +115,11 @@
     </spacer>
    </item>
    <item row="4" column="4">
-    <widget class="QLineEdit" name="cruiseSpeed"/>
+    <widget class="QLineEdit" name="cruiseSpeed">
+     <property name="text">
+      <string>300</string>
+     </property>
+    </widget>
    </item>
    <item row="3" column="1">
     <widget class="QLabel" name="label_2">

@@ -15,9 +15,9 @@
 
 #define MAXRANGE 6.0 //In nm
 #define MAXVSPD 6000.0 //Ft/min
-#define VCRUISE 300.0 //m/s
 #define G 9.81
 #define ACC_INCR 5.08 //1000Ft/min/s?
+#define DEGINC 5.0 //Degrees
 
 typedef enum {TA,
               RA,
@@ -54,7 +54,8 @@ private:
     qreal getDistanceToSelf(Message intruder);
     qreal width,length,height;
     qreal x1,x2,y1,y2; //Line variables
-    qreal acc_z, v_x, v_y, v_z, bearing; //Bearing in degrees, acc and speeds in enu for display, convert on send
+    qreal acc_z, v_E, v_N, v_U, bearing; //Bearing in degrees, acc and speeds in enu for display, convert on send
+    qreal vmax;
     int sl,tau_TA,tau_RA;
     qreal zthr_TA,zthr_RA,dmod_TA,dmod_RA,alim,taumod_TA, taumod_RA;
     qreal ang,intruder_scale,plane_scale, indicator_scale;
