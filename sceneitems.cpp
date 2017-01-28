@@ -126,8 +126,10 @@ void SceneItems::drawIntruders(QPainter *painter)
         Advisory threat_level = issue_TA_RA(&i);
         advanceStatus(&i,threat_level);
         qDebug()<<self.TCAS_status;
-        qDebug()<<self.Resolution;
-        qDebug()<<self.Resolution_val/FT2M*60;
+        if (threat_level==RA){
+            qDebug()<<self.Resolution;
+            qDebug()<<self.Resolution_val/FT2M*60;
+        }
         switch (threat_level) {
         case TA:
             painter->drawPixmap(center_x+x*length/MAXRANGE-PT_image.width()*intruder_scale/2,
@@ -422,7 +424,7 @@ void SceneItems::computeResolutionStrength(QVector3D *intr, QVector3D *intr_spd)
     // Assume intruder keeps his current path and loop to check
     // which vertical speed will allow us to obtain the separation ALIM at CPA
     int sense;
-    int inc = 30;
+    int inc = 10;
     qreal target_diff=alim*FT2M;
     double target_v;
     if (!strcmp(self.Resolution,"CLIMB")){sense=1;
@@ -432,7 +434,7 @@ void SceneItems::computeResolutionStrength(QVector3D *intr, QVector3D *intr_spd)
     qreal h_at_cpa, h_diff;
     do{
         target_v += inc;
-        h_at_cpa = ownAltAt(target_v,0.25*G,taumod_RA,sense);
+        h_at_cpa = ownAltAt(target_v,0.35*G,taumod_RA,sense);
         h_diff = h_at_cpa - (intr->z() + taumod_RA * intr_spd->z());
     }while(qFabs(h_diff)<target_diff);
     self.Resolution_val = target_v;
@@ -468,7 +470,7 @@ void SceneItems::advanceStatus(Message *intruder, Advisory result){
                     complementResolutions(intruder);
                     computeResolutionStrength(&intr, &intr_spd);
                 }else{
-                    int sense = RA_sense(&intr, &intr_spd, 1500 * FT2M / 60.0, 0.25 * G, taumod_RA);
+                    int sense = RA_sense(&intr, &intr_spd, 1500 * FT2M / 60.0, 0.35 * G, taumod_RA);
                     if (sense==1){
                         strcpy(self.Resolution,"CLIMB");
                     }else{
@@ -476,13 +478,15 @@ void SceneItems::advanceStatus(Message *intruder, Advisory result){
                     computeResolutionStrength(&intr, &intr_spd);
                 }
                 strcpy(self.TCAS_status,"RESOLVING");
-            }else if(!strcmp(self.TCAS_status,"RESOLVING") && !strcmp(intruder->TCAS_status,"RESOLVING")){
-                bool diff_resolutions = areResolutionsComplementary(intruder);
-                if (!diff_resolutions && self.Ac_id < intruder->Ac_id){
-                    complementResolutions(intruder);
-                    computeResolutionStrength(&intr, &intr_spd);
+            }else if(!strcmp(self.TCAS_status,"RESOLVING")){
+                if(!strcmp(intruder->TCAS_status,"RESOLVING")){
+                    bool diff_resolutions = areResolutionsComplementary(intruder);
+                    if (!diff_resolutions && self.Ac_id < intruder->Ac_id){
+                        complementResolutions(intruder);}
                 }
+                computeResolutionStrength(&intr, &intr_spd);
             }
+
     }
     //if result is TA, several cases
     //if RESOLVING or RETURNING, status is set to RETURNING

@@ -17,7 +17,7 @@
 #define MAXRANGE 6.0 //In nm
 #define MAXVSPD 6000.0 //Ft/min
 #define G 9.81
-#define ACC_INCR 0.25*G //1000Ft/min/s?
+#define ACC_INCR 0.35*G //1000Ft/min/s?
 #define DEGINC 5.0 //Degrees
 
 typedef enum {TA,
