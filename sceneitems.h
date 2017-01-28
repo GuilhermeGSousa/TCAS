@@ -17,7 +17,7 @@
 #define MAXRANGE 6.0 //In nm
 #define MAXVSPD 6000.0 //Ft/min
 #define G 9.81
-#define ACC_INCR 5.08 //1000Ft/min/s?
+#define ACC_INCR 0.25*G //1000Ft/min/s?
 #define DEGINC 5.0 //Degrees
 
 typedef enum {TA,
@@ -43,20 +43,19 @@ public:
     void setStart(qreal X, qreal Y, qreal Z, qreal V);
 
 private:
-    int RA_sense(Message* i, qreal v, qreal a, qreal t);
+    int RA_sense(QVector3D *i, QVector3D *i_spd, qreal v, qreal a, qreal t);
     qreal stopAccel(qreal v, qreal a, qreal t, int sense);
     qreal ownAltAt(qreal v, qreal a, qreal t, int sense);
-    bool correctiveRA(Message* intruder, int sense);
-    void computeTCAStimes(Message* intruder, qreal* t2cpa, qreal* t2coa, QPointF* pos_rel, QPointF* vel_rel);
+    void computeTCAStimes(QVector3D *intr, QVector3D *intr_spd, qreal* t2cpa, qreal* t2coa, QPointF* pos_rel, QPointF* vel_rel);
     Advisory issue_TA_RA(Message* intruder);
     void complementResolutions(Message* intruder);
     bool areResolutionsComplementary(Message* intruder);
-    void computeResolutionStrength(Message* intruder);
+    void computeResolutionStrength(QVector3D *intr, QVector3D *intr_spd);
     void advanceStatus(Message* intruder, Advisory result);
     void rotatePointer(qreal rotation);
     bool isIdInList(int id);
     void drawIntruders(QPainter *painter);
-    void drawTarget(QPainter *painter, qreal v_target);
+    void drawTarget(QPainter *painter, qreal v_min, qreal v_max);
     QVector3D llh_pos;
     qreal getDistanceToSelf(Message intruder);
     qreal width,length,height;
@@ -69,6 +68,7 @@ private:
     QPixmap PT_image, TA_image, OT_image, RA_image, plane_image, indicator_image;
     Message self;
     QList<Message> intruder_list;
+    QVector3D me;
 };
 
 #endif // POINTER_H

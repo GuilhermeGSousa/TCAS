@@ -125,7 +125,9 @@ void SceneItems::drawIntruders(QPainter *painter)
 
         Advisory threat_level = issue_TA_RA(&i);
         advanceStatus(&i,threat_level);
-        qDebug()<<self.Resolution_val;
+        qDebug()<<self.TCAS_status;
+        qDebug()<<self.Resolution;
+        qDebug()<<self.Resolution_val/FT2M*60;
         switch (threat_level) {
         case TA:
             painter->drawPixmap(center_x+x*length/MAXRANGE-PT_image.width()*intruder_scale/2,
@@ -161,12 +163,13 @@ void SceneItems::drawIntruders(QPainter *painter)
     }
 }
 
-void SceneItems::drawTarget(QPainter *painter, qreal v_target)
+void SceneItems::drawTarget(QPainter *painter, qreal v_min, qreal v_max)
 {
     QPen pen(Qt::green);
     pen.setWidth(25);
     painter->setPen(pen);
-    painter->drawArc(width/2-390,height/2-350,780,700,0,5695);
+    const int radius = 5695;
+    painter->drawArc(width/2-390,height/2-350,780,700,radius,-radius/2);
 }
 
 
@@ -238,17 +241,17 @@ void SceneItems::setStart(qreal X, qreal Y, qreal Z, qreal V)
 
 //afonso stuff
 
-int SceneItems::RA_sense(Message* i, qreal v, qreal a, qreal t)
+int SceneItems::RA_sense(QVector3D *i, QVector3D *i_spd, qreal v, qreal a, qreal t)
 {
     qreal h_up = ownAltAt(v,a,t,1);
     qreal h_down = ownAltAt(v,a,t,-1);
-    qreal h_i = i->Z_pos + t * i->Z_spd;
+    qreal h_i = i->z() + t * i_spd->z();
     qreal u = h_up-h_i;
     qreal d = h_i-h_down;
 
-    if(self.Z_pos-i->Z_pos>0 && u >= alim*FT2M){
+    if(me.z()-i->z()>0 && u >= alim*FT2M){
         return 1;
-    }else if(self.Z_pos-i->Z_pos<0 && d >= alim*FT2M){
+    }else if(me.z()-i->z()<0 && d >= alim*FT2M){
         return -1;
     }else if(u >= d){
         return 1;
@@ -259,10 +262,10 @@ int SceneItems::RA_sense(Message* i, qreal v, qreal a, qreal t)
 
 qreal SceneItems::stopAccel(qreal v, qreal a, qreal t, int sense)
 {
-    if(t<=0 || sense*self.Z_spd >= v)
+    if(t<=0 || sense*v_U >= v)
         return 0;
     else
-        return (sense*v-self.Z_spd)/(sense*a);
+        return (sense*v-v_U)/(sense*a);
 }
 
 qreal SceneItems::ownAltAt(qreal v, qreal a, qreal t, int sense)
@@ -271,37 +274,42 @@ qreal SceneItems::ownAltAt(qreal v, qreal a, qreal t, int sense)
     qreal q = qMin(t,s);
     qreal l = qMax(0.0,(t-s));
 
-    return sense*q*q*a/2+q*self.Z_spd+self.Z_pos+sense*l*v;
+    return sense*q*q*a/2+q*v_U+me.z()+sense*l*v;
 }
 
-bool SceneItems::correctiveRA(Message *intruder, int sense)
-{
-    QPointF pos_rel(self.X_pos-intruder->X_pos,self.Y_pos-intruder->Y_pos);
-    QPointF vel_rel(self.X_spd-intruder->X_spd,self.Y_spd-intruder->Y_spd);
-    qreal h_rel = self.Z_pos - intruder->Z_pos;
-    qreal vz_rel = self.Z_spd - intruder->Z_spd;
 
-    return (sqrt(QPointF::dotProduct(pos_rel,pos_rel)) < dmod_RA) || (QPointF::dotProduct(vel_rel,pos_rel)<0
-                                                                      && sense*(h_rel+taumod_RA*vz_rel)<alim*FT2M);
-}
-
-void SceneItems::computeTCAStimes(Message *intruder, qreal *t2cpa, qreal *t2coa, QPointF* pos_rel, QPointF* vel_rel){
-    pos_rel = new QPointF(self.X_pos-intruder->X_pos,self.Y_pos-intruder->Y_pos);
-    vel_rel = new QPointF(self.X_spd-intruder->X_spd,self.Y_spd-intruder->Y_spd);
+void SceneItems::computeTCAStimes(QVector3D *intr, QVector3D *intr_spd, qreal *t2cpa, qreal *t2coa, QPointF* pos_rel, QPointF* vel_rel){
 
     *t2cpa = -(QPointF::dotProduct(*pos_rel, *vel_rel) / QPointF::dotProduct(*vel_rel, *vel_rel));
-    *t2coa = -(self.Z_pos-intruder->Z_pos)/(self.Z_spd-intruder->Z_spd);
+    *t2coa = -(me.z()-intr->z())/(v_U-intr_spd->z());
 }
 
 Advisory SceneItems::issue_TA_RA(Message *intruder)
 {
+
+    me.setX(self.X_pos);
+    me.setY(self.Y_pos);
+    me.setZ(self.Z_pos);
+
+    QVector3D intr(intruder->X_pos,
+                   intruder->Y_pos,
+                   intruder->Z_pos);
+
+    me = wgs2enu(me.x(),me.y(),me.z(),llh_pos.x(),llh_pos.y());
+    intr = wgs2enu(intr.x(),intr.y(),intr.z(),llh_pos.x(),llh_pos.y());
+
+    QVector3D intr_spd = wgs2enu(intruder->X_spd,intruder->Y_spd,intruder->Z_spd,llh_pos.x(),llh_pos.y());
+
+    QPointF pos_rel(me.x()-intr.x(),me.y()-intr.y());
+    QPointF vel_rel(v_E-intr_spd.x(),v_N-intr_spd.y());
+
+
     //Self e intruder em SI
-    QPointF pos_rel,vel_rel;
     qreal time2cpa, time2coa;
-    computeTCAStimes(intruder, &time2cpa, &time2coa, &pos_rel, &vel_rel);
+    computeTCAStimes(&intr, &intr_spd, &time2cpa, &time2coa, &pos_rel, &vel_rel);
 
     //
-    if(self.Z_pos*FT2M<=1000){
+    if(me.z()/FT2M<=1000){
         sl=2;
         tau_TA = 20;//s
         tau_RA = 0;
@@ -311,7 +319,7 @@ Advisory SceneItems::issue_TA_RA(Message *intruder)
         zthr_RA = 0;
         alim= 0;
 
-    }else if(self.Z_pos*FT2M<=2350){
+    }else if(me.z()/FT2M<=2350){
         sl=3;
         tau_TA = 25;//s
         tau_RA = 15;
@@ -320,7 +328,7 @@ Advisory SceneItems::issue_TA_RA(Message *intruder)
         zthr_TA = 850;//ft
         zthr_RA = 600;
         alim= 300;
-    }else if(self.Z_pos*FT2M<=5000){
+    }else if(me.z()/FT2M<=5000){
         sl=4;
         tau_TA = 30;//s
         tau_RA = 20;
@@ -329,7 +337,7 @@ Advisory SceneItems::issue_TA_RA(Message *intruder)
         zthr_TA = 850;//ft
         zthr_RA = 600;
         alim= 300;
-    }else if(self.Z_pos*FT2M<=10000){
+    }else if(me.z()/FT2M<=10000){
         sl=5;
         tau_TA = 40;//s
         tau_RA = 25;
@@ -338,7 +346,7 @@ Advisory SceneItems::issue_TA_RA(Message *intruder)
         zthr_TA = 850;//ft
         zthr_RA = 600;
         alim= 350;
-    }else if(self.Z_pos*FT2M<=20000){
+    }else if(me.z()/FT2M<=20000){
         sl=6;
         tau_TA = 45;//s
         tau_RA = 30;
@@ -347,7 +355,7 @@ Advisory SceneItems::issue_TA_RA(Message *intruder)
         zthr_TA = 850;//ft
         zthr_RA = 600;
         alim= 400;
-    }else if(self.Z_pos*FT2M<=42000){
+    }else if(me.z()/FT2M<=42000){
         sl=7;
         tau_TA = 48;//s
         tau_RA = 35;
@@ -373,20 +381,20 @@ Advisory SceneItems::issue_TA_RA(Message *intruder)
     bool horizontal_RA = (sqrt(QPointF::dotProduct(pos_rel,pos_rel)) <= dmod_RA*NM2M) || (QPointF::dotProduct(pos_rel,vel_rel)<0
                                                                                           && taumod_RA < tau_RA);
 
-    bool vertical_RA = (qFabs(self.Z_pos-intruder->Z_pos) <= zthr_RA*FT2M) || ((self.Z_pos-intruder->Z_pos) * (self.Z_spd-intruder->Z_spd) <0
+    bool vertical_RA = (qFabs(me.z()-intr.z()) <= zthr_RA*FT2M) || ((me.z()-intr.z()) * (v_U-intr_spd.z()) <0
                                                                                && time2coa < tau_RA);
 
     bool horizontal_TA = (sqrt(QPointF::dotProduct(pos_rel,pos_rel)) <= dmod_TA*NM2M) || (QPointF::dotProduct(pos_rel,vel_rel)<0
                                                                                           && taumod_TA < tau_TA);
 
-    bool vertical_TA = (qFabs(self.Z_pos-intruder->Z_pos) <= zthr_TA*FT2M) || ((self.Z_pos-intruder->Z_pos) * (self.Z_spd-intruder->Z_spd) <0
+    bool vertical_TA = (qFabs(me.z()-intr.z()) <= zthr_TA*FT2M) || ((me.z()-intr.z()) * (v_U-intr_spd.z()) <0
                                                                                && time2coa < tau_TA);
 
     if(horizontal_RA && vertical_RA) {
         return RA;
     }else if((horizontal_TA || horizontal_RA) && (vertical_TA || vertical_RA)) {
         return TA;
-    }else if(sqrt(QPointF::dotProduct(pos_rel,pos_rel))<6*NM2M && qFabs(self.Z_pos-intruder->Z_pos)<1200*FT2M) {
+    }else if(sqrt(QPointF::dotProduct(pos_rel,pos_rel))<6*NM2M && qFabs(me.z()-intr.z())<1200*FT2M) {
         return PT;
     }else{
         return OT;
@@ -409,7 +417,7 @@ bool SceneItems::areResolutionsComplementary(Message* intruder){
     }
 }
 
-void SceneItems::computeResolutionStrength(Message *intruder){
+void SceneItems::computeResolutionStrength(QVector3D *intr, QVector3D *intr_spd){
     // We know the resolution sense by now
     // Assume intruder keeps his current path and loop to check
     // which vertical speed will allow us to obtain the separation ALIM at CPA
@@ -419,19 +427,28 @@ void SceneItems::computeResolutionStrength(Message *intruder){
     double target_v;
     if (!strcmp(self.Resolution,"CLIMB")){sense=1;
     }else{sense=-1;}
-    if (sense*self.Z_spd>0){target_v=self.Z_spd-inc;
+    if (sense*v_U>0){target_v=v_U-inc;
     }else{target_v=-inc;}
     qreal h_at_cpa, h_diff;
     do{
         target_v += inc;
         h_at_cpa = ownAltAt(target_v,0.25*G,taumod_RA,sense);
-        h_diff = h_at_cpa - (intruder->Z_pos + taumod_RA * intruder->Z_spd);
+        h_diff = h_at_cpa - (intr->z() + taumod_RA * intr_spd->z());
     }while(qFabs(h_diff)<target_diff);
     self.Resolution_val = target_v;
 }
 
 
 void SceneItems::advanceStatus(Message *intruder, Advisory result){
+
+
+    QVector3D intr(intruder->X_pos,
+                   intruder->Y_pos,
+                   intruder->Z_pos);
+
+    intr = wgs2enu(intr.x(),intr.y(),intr.z(),llh_pos.x(),llh_pos.y());
+
+    QVector3D intr_spd = wgs2enu(intruder->X_spd,intruder->Y_spd,intruder->Z_spd,llh_pos.x(),llh_pos.y());
 
     //result=TA/RA/NT/PT
     switch(result){
@@ -449,21 +466,21 @@ void SceneItems::advanceStatus(Message *intruder, Advisory result){
             if (!strcmp(self.TCAS_status,"CLEAR") || !strcmp(self.TCAS_status,"ADVISORY")){
                 if (!strcmp(intruder->TCAS_status,"RESOLVING")){
                     complementResolutions(intruder);
-                    computeResolutionStrength(intruder);
+                    computeResolutionStrength(&intr, &intr_spd);
                 }else{
-                    int sense = RA_sense(intruder, 1500 * FT2M / 60.0, 0.25 * G, taumod_RA);
+                    int sense = RA_sense(&intr, &intr_spd, 1500 * FT2M / 60.0, 0.25 * G, taumod_RA);
                     if (sense==1){
                         strcpy(self.Resolution,"CLIMB");
                     }else{
                         strcpy(self.Resolution,"DESCEND");}
-                    computeResolutionStrength(intruder);
+                    computeResolutionStrength(&intr, &intr_spd);
                 }
                 strcpy(self.TCAS_status,"RESOLVING");
             }else if(!strcmp(self.TCAS_status,"RESOLVING") && !strcmp(intruder->TCAS_status,"RESOLVING")){
                 bool diff_resolutions = areResolutionsComplementary(intruder);
                 if (!diff_resolutions && self.Ac_id < intruder->Ac_id){
                     complementResolutions(intruder);
-                    computeResolutionStrength(intruder);
+                    computeResolutionStrength(&intr, &intr_spd);
                 }
             }
     }
@@ -530,6 +547,6 @@ void SceneItems::paint(QPainter *painter, const QStyleOptionGraphicsItem *option
 
 
     // Loop to draw all intruders here
-    drawTarget(painter,0);
+    drawTarget(painter,0 , 0);
     drawIntruders(painter);
 }
