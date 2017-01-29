@@ -161,7 +161,6 @@ void SceneItems::drawIntruders(QPainter *painter)
             break;
         }
 
-
     }
 }
 
@@ -252,12 +251,16 @@ int SceneItems::RA_sense(QVector3D *i, QVector3D *i_spd, qreal v, qreal a, qreal
     qreal d = h_i-h_down;
 
     if(me.z()-i->z()>0 && u >= alim*FT2M){
+        qDebug()<<"Case 1";
         return 1;
     }else if(me.z()-i->z()<0 && d >= alim*FT2M){
+        qDebug()<<"Case 2";
         return -1;
     }else if(u >= d){
+        qDebug()<<"Case 3";
         return 1;
     }else {
+        qDebug()<<"Case 4";
         return -1;
     }
 }
@@ -429,14 +432,15 @@ void SceneItems::computeResolutionStrength(QVector3D *intr, QVector3D *intr_spd)
     double target_v;
     if (!strcmp(self.Resolution,"CLIMB")){sense=1;
     }else{sense=-1;}
-    if (sense*v_U>0){target_v=v_U-inc;
-    }else{target_v=-inc;}
+    if (sense*v_U>0){target_v=v_U-inc*sense;
+    }else{target_v=-inc*sense;}
     qreal h_at_cpa, h_diff;
     do{
-        target_v += inc;
+        target_v += inc*sense;
         h_at_cpa = ownAltAt(target_v,0.35*G,taumod_RA,sense);
         h_diff = h_at_cpa - (intr->z() + taumod_RA * intr_spd->z());
-    }while(qFabs(h_diff)<target_diff);
+    }while(qFabs(h_diff)<target_diff && qFabs(target_v)<6000*FT2M/60);
+    if (qFabs(target_v)>6000*FT2M/60){target_v=sense*6000*FT2M/60;}
     self.Resolution_val = target_v;
 }
 
