@@ -118,6 +118,7 @@ void SceneItems::drawIntruders(QPainter *painter)
         QVector3D intr_spd = wgs2enu(i.X_spd,i.Y_spd,i.Z_spd,llh_pos.x(),llh_pos.y());
 
         QVector3D intr_rel=intr-me;
+        qreal h_rel = intr_rel.z();
         qreal dist = intr_rel.distanceToPoint(QVector3D(0,0,0));
         //Change to our frame of ref
         //Rever matrizes de rotação!
@@ -128,7 +129,7 @@ void SceneItems::drawIntruders(QPainter *painter)
         qreal x = intr_rel.x()/NM2M;
         qreal y = intr_rel.y()/NM2M;
 
-
+        QPen* penHText;
 
         Advisory threat_level = issue_TA_RA(&i);
         advanceStatus(&i,threat_level);
@@ -157,6 +158,7 @@ void SceneItems::drawIntruders(QPainter *painter)
                                     PT_image.height()*intruder_scale,
                                     yellow_arrow_up);
             }
+            penHText = new QPen(QColor(255,249,0,255));
             break;
         case RA:
             painter->drawPixmap(center_x+x*length/MAXRANGE-PT_image.width()*intruder_scale/2,
@@ -177,6 +179,7 @@ void SceneItems::drawIntruders(QPainter *painter)
                                     PT_image.height()*intruder_scale,
                                     red_arrow_up);
             }
+            penHText = new QPen(QColor(255,0,0,255));
             break;
         case PT:
             painter->drawPixmap(center_x+x*length/MAXRANGE-PT_image.width()*intruder_scale/2,
@@ -197,6 +200,7 @@ void SceneItems::drawIntruders(QPainter *painter)
                                     PT_image.height()*intruder_scale,
                                     blue_arrow_up);
             }
+            penHText = new QPen(QColor(0,147,255,255));
             break;
         case OT:
             painter->drawPixmap(center_x+x*length/MAXRANGE-PT_image.width()*intruder_scale/2,
@@ -217,9 +221,26 @@ void SceneItems::drawIntruders(QPainter *painter)
                                     PT_image.height()*intruder_scale,
                                     blue_arrow_up);
             }
+            penHText = new QPen(QColor(0,147,255,255));
             break;
         }
-
+        painter->setPen(*penHText);
+        char text[2];
+        if (h_rel<0){
+            sprintf(text, "-%02d", int(-h_rel/FT2M/100));
+            painter->drawText(QRect(center_x+x*length/MAXRANGE-PT_image.width()*intruder_scale*4/5,
+                                    center_y-y*length/MAXRANGE+PT_image.height()*intruder_scale/2,
+                                    PT_image.width()*intruder_scale*3/2,
+                                    15),
+                                    Qt::AlignCenter, text);
+        }else{
+            sprintf(text, "+%02d", int(h_rel/FT2M/100));
+            painter->drawText(QRect(center_x+x*length/MAXRANGE-PT_image.width()*intruder_scale*4/5,
+                                    center_y-y*length/MAXRANGE-PT_image.height()*intruder_scale*5/4,
+                                    PT_image.width()*intruder_scale*3/2,
+                                    15),
+                                    Qt::AlignCenter, text);
+        }
     }
 }
 
