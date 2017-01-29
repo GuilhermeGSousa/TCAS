@@ -66,6 +66,7 @@ private:
     qreal zthr_TA,zthr_RA,dmod_TA,dmod_RA,alim,taumod_TA, taumod_RA;
     qreal ang,intruder_scale,plane_scale, indicator_scale;
     QPixmap PT_image, TA_image, OT_image, RA_image, plane_image, indicator_image;
+    QPixmap blue_arrow_down, blue_arrow_up, red_arrow_down, red_arrow_up, yellow_arrow_down, yellow_arrow_up;
     Message self;
     QList<Message> intruder_list;
     QVector3D me;

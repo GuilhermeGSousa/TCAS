@@ -6,5 +6,11 @@
         <file alias="TA">Images/TA.png</file>
         <file alias="PT">Images/PT.png</file>
         <file alias="Indicator">Images/TCAS_indicator.png</file>
+        <file>Images/blue_arrow_down.png</file>
+        <file>Images/blue_arrow_up.png</file>
+        <file>Images/red_arrow_down.png</file>
+        <file>Images/red_arrow_up.png</file>
+        <file>Images/yellow_arrow_down.png</file>
+        <file>Images/yellow_arrow_up.png</file>
     </qresource>
 </RCC>

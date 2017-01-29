@@ -16,6 +16,12 @@ SceneItems::SceneItems(qreal width,qreal height,qreal length)
     TA_image = QPixmap::fromImage(QImage(":/TA"));
     RA_image = QPixmap::fromImage(QImage(":/RA"));
     OT_image = QPixmap::fromImage(QImage(":/OT"));
+    blue_arrow_down = QPixmap::fromImage(QImage(":/Images/blue_arrow_down.png"));
+    blue_arrow_up = QPixmap::fromImage(QImage(":/Images/blue_arrow_up.png"));
+    red_arrow_down = QPixmap::fromImage(QImage(":/Images/red_arrow_down.png"));
+    red_arrow_up = QPixmap::fromImage(QImage(":/Images/red_arrow_up.png"));
+    yellow_arrow_down = QPixmap::fromImage(QImage(":/Images/yellow_arrow_down.png"));
+    yellow_arrow_up = QPixmap::fromImage(QImage(":/Images/yellow_arrow_up.png"));
 
     plane_image =  QPixmap::fromImage(QImage(":/plane"));
 
@@ -109,6 +115,7 @@ void SceneItems::drawIntruders(QPainter *painter)
 
         me = wgs2enu(me.x(),me.y(),me.z(),llh_pos.x(),llh_pos.y());
         intr = wgs2enu(intr.x(),intr.y(),intr.z(),llh_pos.x(),llh_pos.y());
+        QVector3D intr_spd = wgs2enu(i.X_spd,i.Y_spd,i.Z_spd,llh_pos.x(),llh_pos.y());
 
         QVector3D intr_rel=intr-me;
         qreal dist = intr_rel.distanceToPoint(QVector3D(0,0,0));
@@ -137,6 +144,19 @@ void SceneItems::drawIntruders(QPainter *painter)
                                 PT_image.width()*intruder_scale,
                                 PT_image.height()*intruder_scale,
                                 TA_image);
+            if (intr_spd.z()<0){
+                painter->drawPixmap(center_x+x*length/MAXRANGE+PT_image.width()*intruder_scale/2,
+                                    center_y-y*length/MAXRANGE-PT_image.height()*intruder_scale/2,
+                                    yellow_arrow_down.width()*intruder_scale*0.8,
+                                    PT_image.height()*intruder_scale,
+                                    yellow_arrow_down);
+            }else if (intr_spd.z()>0){
+                painter->drawPixmap(center_x+x*length/MAXRANGE+PT_image.width()*intruder_scale/2,
+                                    center_y-y*length/MAXRANGE-PT_image.height()*intruder_scale/2,
+                                    yellow_arrow_up.width()*intruder_scale*0.8,
+                                    PT_image.height()*intruder_scale,
+                                    yellow_arrow_up);
+            }
             break;
         case RA:
             painter->drawPixmap(center_x+x*length/MAXRANGE-PT_image.width()*intruder_scale/2,
@@ -144,6 +164,19 @@ void SceneItems::drawIntruders(QPainter *painter)
                                 PT_image.width()*intruder_scale,
                                 PT_image.height()*intruder_scale,
                                 RA_image);
+            if (intr_spd.z()<0){
+                painter->drawPixmap(center_x+x*length/MAXRANGE+PT_image.width()*intruder_scale/2,
+                                    center_y-y*length/MAXRANGE-PT_image.height()*intruder_scale/2,
+                                    red_arrow_down.width()*intruder_scale*0.8,
+                                    PT_image.height()*intruder_scale,
+                                    red_arrow_down);
+            }else if (intr_spd.z()>0){
+                painter->drawPixmap(center_x+x*length/MAXRANGE+PT_image.width()*intruder_scale/2,
+                                    center_y-y*length/MAXRANGE-PT_image.height()*intruder_scale/2,
+                                    red_arrow_up.width()*intruder_scale*0.8,
+                                    PT_image.height()*intruder_scale,
+                                    red_arrow_up);
+            }
             break;
         case PT:
             painter->drawPixmap(center_x+x*length/MAXRANGE-PT_image.width()*intruder_scale/2,
@@ -151,6 +184,19 @@ void SceneItems::drawIntruders(QPainter *painter)
                                 PT_image.width()*intruder_scale,
                                 PT_image.height()*intruder_scale,
                                 PT_image);
+            if (intr_spd.z()<0){
+                painter->drawPixmap(center_x+x*length/MAXRANGE+PT_image.width()*intruder_scale/2,
+                                    center_y-y*length/MAXRANGE-PT_image.height()*intruder_scale/2,
+                                    blue_arrow_down.width()*intruder_scale*0.8,
+                                    PT_image.height()*intruder_scale,
+                                    blue_arrow_down);
+            }else if (intr_spd.z()>0){
+                painter->drawPixmap(center_x+x*length/MAXRANGE+PT_image.width()*intruder_scale/2,
+                                    center_y-y*length/MAXRANGE-PT_image.height()*intruder_scale/2,
+                                    blue_arrow_up.width()*intruder_scale*0.8,
+                                    PT_image.height()*intruder_scale,
+                                    blue_arrow_up);
+            }
             break;
         case OT:
             painter->drawPixmap(center_x+x*length/MAXRANGE-PT_image.width()*intruder_scale/2,
@@ -158,6 +204,19 @@ void SceneItems::drawIntruders(QPainter *painter)
                                 PT_image.width()*intruder_scale,
                                 PT_image.height()*intruder_scale,
                                 OT_image);
+            if (intr_spd.z()<0){
+                painter->drawPixmap(center_x+x*length/MAXRANGE+PT_image.width()*intruder_scale/2,
+                                    center_y-y*length/MAXRANGE-PT_image.height()*intruder_scale/2,
+                                    blue_arrow_down.width()*intruder_scale*0.8,
+                                    PT_image.height()*intruder_scale,
+                                    blue_arrow_down);
+            }else if (intr_spd.z()>0){
+                painter->drawPixmap(center_x+x*length/MAXRANGE+PT_image.width()*intruder_scale/2,
+                                    center_y-y*length/MAXRANGE-PT_image.height()*intruder_scale/2,
+                                    blue_arrow_up.width()*intruder_scale*0.8,
+                                    PT_image.height()*intruder_scale,
+                                    blue_arrow_up);
+            }
             break;
         }
 
