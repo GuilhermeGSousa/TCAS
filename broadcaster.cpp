@@ -8,19 +8,12 @@ Broadcaster::Broadcaster(int portNum){
 }
 
 uint32_t Broadcaster::checksumCalc(char* message){
-    uint32_t checkSum= 0;
-    int shift=0;
-    for (int i = 0; i < BUFFSIZE-4; ++i)
-    {
-        checkSum += (message[i] << shift);
-        shift += 8;
-        if (shift==32)
-        {
-            shift=0;
-        }
-    }
 
-    return checkSum;
+        boost::crc_32_type crc;
+
+        crc.process_bytes(message,BUFFSIZE-4);
+
+        return crc.checksum();
 }
 
 void Broadcaster::setSender(int portNum, const char* dest_addr){
@@ -59,22 +52,13 @@ double Broadcaster::bufferToDouble(char * buffer){
 }
 
 void Broadcaster::uint64ToBuff(char *out,uint64_t in){
-    uint64_t aux=in;
-    for(int i=0; i<8; i++){
 
-        out[7-i] = (aux & 0xFF);
-        aux=(aux >> 8);
-    }
+    memcpy(out,(uint64_t *)&in,sizeof(uint64_t));
 }
 
 void Broadcaster::uint32ToBuff(char *out, uint32_t in){
 
-    uint32_t aux=in;
-    for(int i=0; i<4; i++){
-
-        out[7-i]= (aux & 0xFF);
-        aux=(aux >> 8);
-    }
+   memcpy(out,(uint32_t *)&in,sizeof(uint32_t));
 }
 
 
@@ -195,8 +179,16 @@ Message Broadcaster::bufferToMessage(char buffer[BUFFSIZE]){
         out.header[i]=buffer[i+index];
     }index+=16;
 
-    out.Ac_id = ((unsigned long)buffer[0+index] << 56) + ((unsigned long)buffer[1+index] << 48) + ((unsigned long)buffer[2+index] << 40) + ((unsigned long)buffer[3+index] << 32) +
-                ((unsigned long)buffer[4+index] << 24) + ((unsigned long)buffer[5+index] << 16) + ((unsigned long)buffer[6+index] << 8) + (unsigned long)buffer[7+index];
+    //Corrigir!
+
+    for (int i = 0; i < 8; ++i)
+    {
+        aux[i]=buffer[i+index];
+    }
+    memcpy((uint64_t*)&out.Ac_id,aux,sizeof(uint64_t));
+    //out.Ac_id = ((unsigned long)buffer[0+index] << 56) + ((unsigned long)buffer[1+index] << 48) + ((unsigned long)buffer[2+index] << 40) + ((unsigned long)buffer[3+index] << 32) +
+    //            ((unsigned long)buffer[4+index] << 24) + ((unsigned long)buffer[5+index] << 16) + ((unsigned long)buffer[6+index] << 8) + (unsigned long)buffer[7+index];
+
     index+=8;
 
     //Speed and Pos
@@ -243,8 +235,7 @@ Message Broadcaster::bufferToMessage(char buffer[BUFFSIZE]){
     }index+=16;
 
     //Intruder
-    out.Intruder_hex = ((unsigned long)buffer[0+index] << 56) + ((unsigned long)buffer[1+index] << 48) + ((unsigned long)buffer[2+index] << 40) + ((unsigned long)buffer[3+index] << 32) +
-                        ((unsigned long)buffer[4+index] << 24) + ((unsigned long)buffer[5+index] << 16) + ((unsigned long)buffer[6+index] << 8) + (unsigned long)buffer[7+index];
+    memcpy((uint64_t*)&out.Intruder_hex,aux,sizeof(uint64_t));
     index+=8;
 
     //Resolution
@@ -260,8 +251,11 @@ Message Broadcaster::bufferToMessage(char buffer[BUFFSIZE]){
     out.Resolution_val = bufferToDouble(aux);
 
     //Checksum
-
-        out.CRC_32 = (buffer[0+index] << 24) + (buffer[1+index] << 16) + (buffer[2+index] << 8) + (buffer[3+index]) ;
+    for (int i = 0; i < 4; ++i)
+    {
+        aux[i]=buffer[i+index];
+    }
+    memcpy((uint32_t*)&out.CRC_32,aux,sizeof(uint32_t));
     index+=4;
 
     return out;
@@ -270,8 +264,6 @@ Message Broadcaster::bufferToMessage(char buffer[BUFFSIZE]){
 int Broadcaster::sendBuffer(char* buffer){
     int nBytes;
     nBytes=sendto(send_sock,buffer,BUFFSIZE,0,(struct sockaddr*)&sendAddr,sizeof(sendAddr));
-    qDebug()<<htons(sendAddr.sin_port);
-    qDebug()<<sendAddr.sin_addr.s_addr;
     return nBytes;
 }
 

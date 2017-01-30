@@ -11,6 +11,7 @@
 #include <arpa/inet.h>
 #include <iostream>
 #include <QObject>
+#include <boost/crc.hpp>
 
 #define BUFFSIZE 124
 using namespace std;

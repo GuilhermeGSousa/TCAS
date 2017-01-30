@@ -40,6 +40,10 @@ private slots:
 
     void on_upButton_pressed();
 
+    void on_zoomIn_clicked();
+
+    void on_zoomOut_clicked();
+
 private:
     void setup();
     void setupListener(int portNum);

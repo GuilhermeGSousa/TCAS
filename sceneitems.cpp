@@ -70,13 +70,17 @@ void SceneItems::advance(int phase){
 void SceneItems::addIntruder(Message m)
 {
     //Add new intruder to list or update intruder messages
-    for(int i = 0; i < intruder_list.length(); i++){
-        if(m.Ac_id == intruder_list[i].Ac_id){
-            intruder_list.replace(i,m);
-            return;
+
+    if(m.Ac_id != 0xF34C290F)
+    {
+        for(int i = 0; i < intruder_list.length(); i++){
+            if(m.Ac_id == intruder_list[i].Ac_id){
+                intruder_list.replace(i,m);
+                return;
+            }
         }
+        intruder_list.append(m);
     }
-    intruder_list.append(m);
 }
 
 void SceneItems::updateIntruders()
@@ -244,16 +248,106 @@ void SceneItems::drawIntruders(QPainter *painter)
     }
 }
 
-void SceneItems::drawTarget(QPainter *painter, qreal v_min, qreal v_max)
-{
-    QPen pen(Qt::green);
-    pen.setWidth(25);
-    painter->setPen(pen);
-    const int radius = 5695;
-    painter->drawArc(width/2-390,height/2-350,780,700,radius,-radius/2);
+qreal SceneItems::converter(qreal v, qreal v0, qreal a0, qreal v1, qreal a1){
+    qreal a;
+    a=(v-v0)*a1/(v1-v0)-((v-v1)*a0/(v1-v0));
+    return a;
 }
 
+void SceneItems::drawTarget(QPainter *painter, qreal v_min)
+{
+    QPen pen(Qt::red);
+    pen.setWidth(25);
+    painter->setPen(pen);
 
+    QPen pen2(Qt::green);
+    pen2.setWidth(25);
+
+
+    const int startAngle = 0;
+    int spanAngle;
+
+    qreal a;
+
+
+    if(v_min>0 && v_min<=1){
+        a=converter(v_min,0,0,1,63);
+
+        painter->drawArc(width/2-280,height/2-260,570,510,startAngle,-(180+a)*16);
+
+        painter->setPen(pen2);
+
+        //painter->drawArc(width/2-280,height/2-260,570,510,-50*16,--60*16);
+
+    }else if (v_min<0 && v_min>=-1){
+        a=converter(-v_min,0,0,1,63);
+
+        painter->drawArc(width/2-280,height/2-260,570,510,startAngle,(180+a)*16);
+
+    }else if(v_min>1 && v_min<=1.5){
+        a=converter(v_min,1,63,1.5,88);
+
+        painter->drawArc(width/2-280,height/2-260,570,510,startAngle,-(180+a)*16);
+
+    }else if(v_min<-1 && v_min>=-1.5){
+        a=converter(-v_min,1,63,1.5,88);
+
+        painter->drawArc(width/2-280,height/2-260,570,510,startAngle,(180+a)*16);
+
+    }else if(v_min>1.5 && v_min<=2){
+
+        a=converter(v_min,1.5,88,2,103);
+        //qDebug()<<a;
+        painter->drawArc(width/2-280,height/2-260,570,510,startAngle,-(180+a)*16);
+
+    }else if(v_min<-1.5 && v_min>=-2){
+
+        a=converter(-v_min,1.5,88,2,103);
+        //qDebug()<<a;
+        painter->drawArc(width/2-280,height/2-260,570,510,startAngle,(180+a)*16);
+
+    }
+    else if(v_min>2 && v_min<=3){
+        a=converter(v_min,2,103,3,128);
+        painter->drawArc(width/2-280,height/2-260,570,510,startAngle,-(180+a)*16);
+
+    }else if(v_min<-2 && v_min>=-3){
+        a=converter(-v_min,2,103,3,128);
+        painter->drawArc(width/2-280,height/2-260,570,510,startAngle,(180+a)*16);
+
+    }
+    else if(v_min>3 && v_min<=4){
+    a=converter(v_min,3,128,4,145);
+    painter->drawArc(width/2-280,height/2-260,570,510,startAngle,-(180+a)*16);
+
+    }else if(v_min<-3 && v_min>=-4){
+        a=converter(-v_min,3,128,4,145);
+        painter->drawArc(width/2-280,height/2-260,570,510,startAngle,(180+a)*16);
+
+        }
+    else if(v_min>4 && v_min<=5){
+        a=converter(v_min,4,145,5,159);
+        painter->drawArc(width/2-390,height/2-350,780,700,startAngle,-(180+a)*16);
+
+    }else if(v_min<-4 && v_min>=-5){
+        a=converter(-v_min,4,145,5,159);
+        painter->drawArc(width/2-390,height/2-350,780,700,startAngle,(180+a)*16);
+
+    }
+    else if(v_min>5 && v_min<=6){
+        a=converter(v_min,5,159,6,171);
+        painter->drawArc(width/2-280,height/2-260,570,510,startAngle,-(180+a)*16);
+    }
+
+
+
+
+
+
+
+    //painter->drawPixmap(width/2-umemeio_width+20,height-umemeio_height-285,
+    //                umemeio_width*target_scale*4.7,umemeio_height*target_scale*4.6,umemeio_image);
+}
 
 qreal SceneItems::getDistanceToSelf(Message intruder)
 {
@@ -649,6 +743,6 @@ void SceneItems::paint(QPainter *painter, const QStyleOptionGraphicsItem *option
 
 
     // Loop to draw all intruders here
-    drawTarget(painter,0 , 0);
+    drawTarget(painter,5);
     drawIntruders(painter);
 }

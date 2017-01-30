@@ -12,7 +12,8 @@ Widget::Widget(QWidget *parent) :
     ui->leftButton->setVisible(false);
     ui->rightButton->setVisible(false);
     ui->upButton->setVisible(false);
-
+    ui->zoomIn->setVisible(false);
+    ui->zoomOut->setVisible(false);
 
 }
 
@@ -43,13 +44,14 @@ void Widget::setup(){
     scene->addItem(scene_items);
 
     scene_manager=new SceneManager(scene_items,broadcaster);
-    send_manager = new SceneManager(scene_items,send_broadcaster);
+
 }
 
 void Widget::setupListener(int portNum)
 {
     broadcaster = new Broadcaster(portNum);
     send_broadcaster = new Broadcaster(portNum);
+    send_manager = new SceneManager(scene_items,send_broadcaster);
 
     time = new QTimer(this);
     send_timer = new QTimer(this);
@@ -111,6 +113,8 @@ void Widget::on_pushButton_clicked()
         ui->label_3->setVisible(false);
         ui->label_4->setVisible(false);
         ui->label_5->setVisible(false);
+        ui->zoomIn->setVisible(true);
+        ui->zoomOut->setVisible(true);
     }
 
 }
@@ -161,3 +165,13 @@ void Widget::on_downButton_clicked()
 }
 
 
+
+void Widget::on_zoomIn_clicked()
+{
+
+}
+
+void Widget::on_zoomOut_clicked()
+{
+
+}

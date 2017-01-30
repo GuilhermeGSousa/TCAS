@@ -18,7 +18,7 @@
 #define MAXVSPD 6000.0 //Ft/min
 #define G 9.81
 #define ACC_INCR 0.35*G //1000Ft/min/s?
-#define DEGINC 5.0 //Degrees
+#define DEGINC 1.0 //Degrees
 
 typedef enum {TA,
               RA,
@@ -55,7 +55,8 @@ private:
     void rotatePointer(qreal rotation);
     bool isIdInList(int id);
     void drawIntruders(QPainter *painter);
-    void drawTarget(QPainter *painter, qreal v_min, qreal v_max);
+    void drawTarget(QPainter *painter, qreal v_min);
+    qreal converter(qreal v, qreal v0, qreal a0, qreal v1, qreal a1);
     QVector3D llh_pos;
     qreal getDistanceToSelf(Message intruder);
     qreal width,length,height;
