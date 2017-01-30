@@ -426,6 +426,11 @@ void SceneItems::setStart(qreal X, qreal Y, qreal Z, qreal V)
 
 }
 
+void SceneItems::setCRC(uint32_t crc)
+{
+    self.CRC_32 = crc;
+}
+
 //afonso stuff
 
 int SceneItems::RA_sense(QVector3D *i, QVector3D *i_spd, qreal v, qreal a, qreal t)

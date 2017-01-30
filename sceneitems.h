@@ -41,6 +41,7 @@ public:
     void goLeft();
     void goRight();
     void setStart(qreal X, qreal Y, qreal Z, qreal V);
+    void setCRC(uint32_t crc);
 
 private:
     int RA_sense(QVector3D *i, QVector3D *i_spd, qreal v, qreal a, qreal t);

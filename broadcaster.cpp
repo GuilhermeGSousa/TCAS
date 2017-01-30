@@ -11,7 +11,7 @@ uint32_t Broadcaster::checksumCalc(char* message){
 
         boost::crc_32_type crc;
 
-        crc.process_bytes(message,BUFFSIZE-4);
+        crc.process_bytes(message,120);
 
         return crc.checksum();
 }
@@ -159,7 +159,7 @@ void Broadcaster::messageToBuffer(char* buffer, Message out){
     uint32ToBuff(aux4,out.CRC_32);
     for (int i = 0; i < 8; ++i)
     {
-        buff[i+index]=aux8[i];
+        buff[i+index]=aux4[i];
     }
 
 
@@ -174,6 +174,7 @@ Message Broadcaster::bufferToMessage(char buffer[BUFFSIZE]){
     Message out;
     int index = 0;
     char aux[8];
+    char aux4[4];
     for (int i = 0; i < 16; ++i)
     {
         out.header[i]=buffer[i+index];
@@ -186,9 +187,6 @@ Message Broadcaster::bufferToMessage(char buffer[BUFFSIZE]){
         aux[i]=buffer[i+index];
     }
     memcpy((uint64_t*)&out.Ac_id,aux,sizeof(uint64_t));
-    //out.Ac_id = ((unsigned long)buffer[0+index] << 56) + ((unsigned long)buffer[1+index] << 48) + ((unsigned long)buffer[2+index] << 40) + ((unsigned long)buffer[3+index] << 32) +
-    //            ((unsigned long)buffer[4+index] << 24) + ((unsigned long)buffer[5+index] << 16) + ((unsigned long)buffer[6+index] << 8) + (unsigned long)buffer[7+index];
-
     index+=8;
 
     //Speed and Pos
@@ -253,11 +251,9 @@ Message Broadcaster::bufferToMessage(char buffer[BUFFSIZE]){
     //Checksum
     for (int i = 0; i < 4; ++i)
     {
-        aux[i]=buffer[i+index];
+        aux4[i]=buffer[i+index];
     }
-    memcpy((uint32_t*)&out.CRC_32,aux,sizeof(uint32_t));
-    index+=4;
-
+    memcpy((uint32_t*)&out.CRC_32,aux4,sizeof(uint32_t));
     return out;
 }
 
