@@ -3,7 +3,7 @@
 Broadcaster::Broadcaster(int portNum){
 
     setReceiver(portNum);
-    setSender(portNum,"127.0.0.1");
+    setSender(portNum,"255.255.255.255");
 
 }
 
@@ -29,8 +29,11 @@ void Broadcaster::setSender(int portNum, const char* dest_addr){
     sendAddr.sin_family = AF_INET;
     sendAddr.sin_port = htons(portNum);
     sendAddr.sin_addr.s_addr = inet_addr(dest_addr); //mudar
-    memset(sendAddr.sin_zero, '\0', sizeof sendAddr.sin_zero);
-
+    //memset(sendAddr.sin_zero, '\0', sizeof sendAddr.sin_zero);
+    int perm = 1;
+    if(setsockopt(send_sock,SOL_SOCKET,SO_BROADCAST,(void *)&perm,sizeof(perm))<0){
+        qDebug()<<"Permisson Error";
+    }
 }
 
 void Broadcaster::setReceiver(int portNum){
@@ -267,6 +270,8 @@ Message Broadcaster::bufferToMessage(char buffer[BUFFSIZE]){
 int Broadcaster::sendBuffer(char* buffer){
     int nBytes;
     nBytes=sendto(send_sock,buffer,BUFFSIZE,0,(struct sockaddr*)&sendAddr,sizeof(sendAddr));
+    qDebug()<<htons(sendAddr.sin_port);
+    qDebug()<<sendAddr.sin_addr.s_addr;
     return nBytes;
 }
 

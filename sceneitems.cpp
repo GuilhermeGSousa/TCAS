@@ -133,10 +133,10 @@ void SceneItems::drawIntruders(QPainter *painter)
 
         Advisory threat_level = issue_TA_RA(&i);
         advanceStatus(&i,threat_level);
-        qDebug()<<self.TCAS_status;
+        //qDebug()<<self.TCAS_status;
         if (threat_level==RA){
-            qDebug()<<self.Resolution;
-            qDebug()<<self.Resolution_val/FT2M*60;
+            //qDebug()<<self.Resolution;
+            //qDebug()<<self.Resolution_val/FT2M*60;
         }
         switch (threat_level) {
         case TA:
@@ -298,6 +298,10 @@ void SceneItems::setStart(qreal X, qreal Y, qreal Z, qreal V)
 //Iniciar self aqui
     bearing = 0;
     QVector3D wgs_pos = llh2wgs(X * qreal(M_PI/180.0),Y * qreal(M_PI/180.0),Z);
+    qDebug()<<wgs_pos.x();
+    qDebug()<<wgs_pos.y();
+    qDebug()<<wgs_pos.z();
+
     v_E=0;
     vmax=V;
     v_N=V;
@@ -317,6 +321,14 @@ void SceneItems::setStart(qreal X, qreal Y, qreal Z, qreal V)
 
     self.Ac_id = 0xF34C290F;
 
+    strncpy(self.header,"ACIP TCAS   V01\0", 16);
+
+    strncpy(self.TCAS_status,"CLEAR",16);
+    strncpy(self.Resolution,"CLEAR",16);
+    self.Resolution_val = 0;
+    self.Intruder_hex = 0;
+
+
 
 }
 
@@ -331,16 +343,16 @@ int SceneItems::RA_sense(QVector3D *i, QVector3D *i_spd, qreal v, qreal a, qreal
     qreal d = h_i-h_down;
 
     if(me.z()-i->z()>0 && u >= alim*FT2M){
-        qDebug()<<"Case 1";
+        //qDebug()<<"Case 1";
         return 1;
     }else if(me.z()-i->z()<0 && d >= alim*FT2M){
-        qDebug()<<"Case 2";
+        //qDebug()<<"Case 2";
         return -1;
     }else if(u >= d){
-        qDebug()<<"Case 3";
+        //qDebug()<<"Case 3";
         return 1;
     }else {
-        qDebug()<<"Case 4";
+        //qDebug()<<"Case 4";
         return -1;
     }
 }
@@ -488,9 +500,9 @@ Advisory SceneItems::issue_TA_RA(Message *intruder)
 
 void SceneItems::complementResolutions(Message *intruder){
     if (!strcmp(intruder->Resolution,"CLIMB")){
-        strcpy(self.Resolution,"DESCEND");
+        strncpy(self.Resolution,"DESCEND",16);
     }else{
-        strcpy(self.Resolution,"CLIMB");
+        strncpy(self.Resolution,"CLIMB",16);
     }
 }
 
@@ -539,16 +551,18 @@ void SceneItems::advanceStatus(Message *intruder, Advisory result){
     //result=TA/RA/NT/PT
     switch(result){
         case TA:
+            self.Intruder_hex = intruder->Ac_id;
             if (!strcmp(self.TCAS_status,"RESOLVING") || !strcmp(self.TCAS_status,"RETURNING")){
-                strcpy(self.TCAS_status,"RETURNING");
+                strncpy(self.TCAS_status,"RETURNING",16);
             }else {
-                strcpy(self.TCAS_status,"ADVISORY");
+                strncpy(self.TCAS_status,"ADVISORY",16);
             }break;
         case OT:
         case PT:
-            strcpy(self.TCAS_status,"CLEAR");
+            strncpy(self.TCAS_status,"CLEAR",16);
             break;
         case RA:
+            self.Intruder_hex = intruder->Ac_id;
             if (!strcmp(self.TCAS_status,"CLEAR") || !strcmp(self.TCAS_status,"ADVISORY")){
                 if (!strcmp(intruder->TCAS_status,"RESOLVING")){
                     complementResolutions(intruder);
@@ -556,12 +570,12 @@ void SceneItems::advanceStatus(Message *intruder, Advisory result){
                 }else{
                     int sense = RA_sense(&intr, &intr_spd, 1500 * FT2M / 60.0, 0.35 * G, taumod_RA);
                     if (sense==1){
-                        strcpy(self.Resolution,"CLIMB");
+                        strncpy(self.Resolution,"CLIMB",16);
                     }else{
-                        strcpy(self.Resolution,"DESCEND");}
+                        strncpy(self.Resolution,"DESCEND",16);}
                     computeResolutionStrength(&intr, &intr_spd);
                 }
-                strcpy(self.TCAS_status,"RESOLVING");
+                strncpy(self.TCAS_status,"RESOLVING",16);
             }else if(!strcmp(self.TCAS_status,"RESOLVING")){
                 if(!strcmp(intruder->TCAS_status,"RESOLVING")){
                     bool diff_resolutions = areResolutionsComplementary(intruder);

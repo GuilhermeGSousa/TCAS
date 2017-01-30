@@ -43,12 +43,13 @@ void Widget::setup(){
     scene->addItem(scene_items);
 
     scene_manager=new SceneManager(scene_items,broadcaster);
+    send_manager = new SceneManager(scene_items,send_broadcaster);
 }
 
 void Widget::setupListener(int portNum)
 {
     broadcaster = new Broadcaster(portNum);
-
+    send_broadcaster = new Broadcaster(portNum);
 
     time = new QTimer(this);
     send_timer = new QTimer(this);
@@ -61,10 +62,11 @@ void Widget::setupListener(int portNum)
     connect(listener,SIGNAL(started()),broadcaster,SLOT(listenBuffer()));
     connect(broadcaster,SIGNAL(messageReceived(char*)),scene_manager,SLOT(updateScene(char*)));
     connect(time,SIGNAL(timeout()),scene,SLOT(advance()));
-    connect(send_timer,SIGNAL(timeout()),scene_manager,SLOT(sendSelf()));
+    connect(send_timer,SIGNAL(timeout()),send_manager,SLOT(sendSelf()));
 
     time->start(10);
     send_timer->start(1000);
+
     listener->start();
 }
 

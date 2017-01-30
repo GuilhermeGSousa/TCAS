@@ -18,8 +18,11 @@ void SceneManager::updateScene(char *buffer)
 
 void SceneManager::sendSelf()
 {
-    char buff[BUFFSIZE];
-    broadcaster->messageToBuffer(buff,scene_items->getSelf());
-    broadcaster->sendBuffer(buff);
+//    char *buff = new char[BUFFSIZE];
+//    broadcaster->messageToBuffer(buff,scene_items->getSelf());
+    qDebug()<<"Sending";
+//    int bytes= broadcaster->sendBuffer(buff);
+//    qDebug()<<bytes;
+    broadcaster->sendBuffer("OLA!!!!!");
 }
 

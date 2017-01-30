@@ -55,7 +55,8 @@ private:
     QTimer *time, *send_timer;
     SceneItems *scene_items;
     SceneManager *scene_manager;
-    Broadcaster *broadcaster;
+    SceneManager *send_manager;
+    Broadcaster *broadcaster, *send_broadcaster;
 
 
 
