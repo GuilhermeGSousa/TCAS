@@ -8,7 +8,7 @@
 #define NM2M 1852.0
 #define MPS2FPM 196.850394
 #define FT2M 0.3048
-#define RT 6378137.0 // Raio da terra metros
+#define RT 6371000.0 // Raio da terra metros
 
 typedef struct{
     float lat, lon;

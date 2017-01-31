@@ -56,10 +56,10 @@ void SceneItems::advance(int phase){
     ang=v_U*qreal(M_PI)/(MAXVSPD/MPS2FPM);
 
 
-    if(ang>qreal(M_PI))
-        ang=qreal(M_PI);
-    if(ang<-qreal(M_PI))
-        ang=-qreal(M_PI);
+    if(ang>175.0*qreal(M_PI)/180.0)
+        ang=175.0*qreal(M_PI)/180.0;
+    if(ang<-175*qreal(M_PI)/180.0)
+        ang=-175.0*qreal(M_PI)/180.0;
 
     rotatePointer(ang);
 
@@ -116,9 +116,9 @@ void SceneItems::drawIntruders(QPainter *painter)
                        i.Y_pos,
                        i.Z_pos);
 
-
         me = wgs2enu(me.x(),me.y(),me.z(),llh_pos.x(),llh_pos.y());
         intr = wgs2enu(intr.x(),intr.y(),intr.z(),llh_pos.x(),llh_pos.y());
+
         QVector3D intr_spd = wgs2enu(i.X_spd,i.Y_spd,i.Z_spd,llh_pos.x(),llh_pos.y());
 
         QVector3D intr_rel=intr-me;
@@ -126,6 +126,9 @@ void SceneItems::drawIntruders(QPainter *painter)
         qreal dist = intr_rel.distanceToPoint(QVector3D(0,0,0));
         //Change to our frame of ref
         //Rever matrizes de rotação!
+        qDebug()<<"-------";
+        qDebug()<<intr_enu.z();
+        qDebug()<<me_enu.z();
         intr_rel.setX(intr_rel.x()*cos(bearing*qreal(M_PI)/180.0)-intr_rel.y()*sin(bearing*qreal(M_PI)/180.0));
         intr_rel.setY(intr_rel.x()*sin(bearing*qreal(M_PI)/180.0)+intr_rel.y()*cos(bearing*qreal(M_PI)/180.0));
 
@@ -273,70 +276,125 @@ void SceneItems::drawTarget(QPainter *painter, qreal v_min)
     if(v_min>0 && v_min<=1){
         a=converter(v_min,0,0,1,63);
 
-        painter->drawArc(width/2-280,height/2-260,570,510,startAngle,-(180+a)*16);
+        painter->drawArc(width/2-390,height/2-350,780,700,startAngle,-(180+a)*16);
 
         painter->setPen(pen2);
 
-        //painter->drawArc(width/2-280,height/2-260,570,510,-50*16,--60*16);
+        painter->drawArc(width/2-390,height/2-350,780,700,startAngle+5*16,(180-a-10)*16);
 
     }else if (v_min<0 && v_min>=-1){
         a=converter(-v_min,0,0,1,63);
 
-        painter->drawArc(width/2-280,height/2-260,570,510,startAngle,(180+a)*16);
+        painter->setPen(pen);
+        painter->drawArc(width/2-390,height/2-350,780,700,startAngle,(180+a)*16);
+
+        painter->setPen(pen2);
+        painter->drawArc(width/2-390,height/2-350,780,700,startAngle-5*16,-(180-a-10)*16);
 
     }else if(v_min>1 && v_min<=1.5){
         a=converter(v_min,1,63,1.5,88);
 
-        painter->drawArc(width/2-280,height/2-260,570,510,startAngle,-(180+a)*16);
+        painter->setPen(pen);
+        painter->drawArc(width/2-390,height/2-350,780,700,startAngle,-(180+a)*16);
+
+        painter->setPen(pen2);
+        painter->drawArc(width/2-390,height/2-350,780,700,startAngle+5*16,(180-a-10)*16);
 
     }else if(v_min<-1 && v_min>=-1.5){
         a=converter(-v_min,1,63,1.5,88);
 
-        painter->drawArc(width/2-280,height/2-260,570,510,startAngle,(180+a)*16);
+        painter->setPen(pen);
+        painter->drawArc(width/2-390,height/2-350,780,700,startAngle,(180+a)*16);
+
+        painter->setPen(pen2);
+        painter->drawArc(width/2-390,height/2-350,780,700,startAngle-5*16,-(180-a-10)*16);
 
     }else if(v_min>1.5 && v_min<=2){
 
         a=converter(v_min,1.5,88,2,103);
         //qDebug()<<a;
-        painter->drawArc(width/2-280,height/2-260,570,510,startAngle,-(180+a)*16);
+        painter->setPen(pen);
+        painter->drawArc(width/2-390,height/2-350,780,700,startAngle,-(180+a)*16);
+
+        painter->setPen(pen2);
+        painter->drawArc(width/2-390,height/2-350,780,700,startAngle+5*16,(180-a-10)*16);
 
     }else if(v_min<-1.5 && v_min>=-2){
 
         a=converter(-v_min,1.5,88,2,103);
         //qDebug()<<a;
-        painter->drawArc(width/2-280,height/2-260,570,510,startAngle,(180+a)*16);
+        painter->setPen(pen);
+        painter->drawArc(width/2-390,height/2-350,780,700,startAngle,(180+a)*16);
+
+        painter->setPen(pen2);
+        painter->drawArc(width/2-390,height/2-350,780,700,startAngle-5*16,-(180-a-10)*16);
 
     }
     else if(v_min>2 && v_min<=3){
         a=converter(v_min,2,103,3,128);
-        painter->drawArc(width/2-280,height/2-260,570,510,startAngle,-(180+a)*16);
+
+        painter->setPen(pen);
+        painter->drawArc(width/2-390,height/2-350,780,700,startAngle,-(180+a)*16);
+
+        painter->setPen(pen2);
+        painter->drawArc(width/2-390,height/2-350,780,700,startAngle+5*16,(180-a-10)*16);
 
     }else if(v_min<-2 && v_min>=-3){
         a=converter(-v_min,2,103,3,128);
-        painter->drawArc(width/2-280,height/2-260,570,510,startAngle,(180+a)*16);
+
+        painter->setPen(pen);
+        painter->drawArc(width/2-390,height/2-350,780,700,startAngle,(180+a)*16);
+
+        painter->setPen(pen2);
+        painter->drawArc(width/2-390,height/2-350,780,700,startAngle-5*16,-(180-a-10)*16);
 
     }
     else if(v_min>3 && v_min<=4){
     a=converter(v_min,3,128,4,145);
-    painter->drawArc(width/2-280,height/2-260,570,510,startAngle,-(180+a)*16);
+
+    painter->setPen(pen);
+    painter->drawArc(width/2-390,height/2-350,780,700,startAngle,-(180+a)*16);
+
+    painter->setPen(pen2);
+    painter->drawArc(width/2-390,height/2-350,780,700,startAngle+5*16,(180-a-10)*16);
 
     }else if(v_min<-3 && v_min>=-4){
         a=converter(-v_min,3,128,4,145);
-        painter->drawArc(width/2-280,height/2-260,570,510,startAngle,(180+a)*16);
+
+        painter->setPen(pen);
+        painter->drawArc(width/2-390,height/2-350,780,700,startAngle,(180+a)*16);
+
+        painter->setPen(pen2);
+        painter->drawArc(width/2-390,height/2-350,780,700,startAngle-5*16,-(180-a-10)*16);
 
         }
     else if(v_min>4 && v_min<=5){
         a=converter(v_min,4,145,5,159);
+
+        painter->setPen(pen);
         painter->drawArc(width/2-390,height/2-350,780,700,startAngle,-(180+a)*16);
+
+        painter->setPen(pen2);
+        painter->drawArc(width/2-390,height/2-350,780,700,startAngle+5*16,(180-a-10)*16);
 
     }else if(v_min<-4 && v_min>=-5){
         a=converter(-v_min,4,145,5,159);
+
+        painter->setPen(pen);
         painter->drawArc(width/2-390,height/2-350,780,700,startAngle,(180+a)*16);
+
+        painter->setPen(pen2);
+        painter->drawArc(width/2-390,height/2-350,780,700,startAngle-5*16,-(180-a-10)*16);
 
     }
     else if(v_min>5 && v_min<=6){
         a=converter(v_min,5,159,6,171);
-        painter->drawArc(width/2-280,height/2-260,570,510,startAngle,-(180+a)*16);
+
+        painter->setPen(pen);
+        painter->drawArc(width/2-390,height/2-350,780,700,startAngle,-(180+a)*16);
+
+        painter->setPen(pen2);
+        painter->drawArc(width/2-390,height/2-350,780,700,startAngle+5*16,(180-a-10)*16);
     }
 
 
@@ -348,7 +406,6 @@ void SceneItems::drawTarget(QPainter *painter, qreal v_min)
     //painter->drawPixmap(width/2-umemeio_width+20,height-umemeio_height-285,
     //                umemeio_width*target_scale*4.7,umemeio_height*target_scale*4.6,umemeio_image);
 }
-
 qreal SceneItems::getDistanceToSelf(Message intruder)
 {
     sqrt(pow(self.X_pos-intruder.X_pos,2)+
@@ -630,8 +687,8 @@ void SceneItems::computeResolutionStrength(QVector3D *intr, QVector3D *intr_spd)
         target_v += inc*sense;
         h_at_cpa = ownAltAt(target_v,0.35*G,taumod_RA,sense);
         h_diff = h_at_cpa - (intr->z() + taumod_RA * intr_spd->z());
-    }while(qFabs(h_diff)<target_diff && qFabs(target_v)<6000*FT2M/60);
-    if (qFabs(target_v)>6000*FT2M/60){target_v=sense*6000*FT2M/60;}
+    }while(qFabs(h_diff)<target_diff && qFabs(target_v)<MAXVSPD*FT2M/60);
+    if (qFabs(target_v)>MAXVSPD*FT2M/60){target_v=sense*MAXVSPD*FT2M/60;}
     self.Resolution_val = target_v;
 }
 
@@ -747,7 +804,15 @@ void SceneItems::paint(QPainter *painter, const QStyleOptionGraphicsItem *option
                         plane_width*plane_scale,plane_height*plane_scale,plane_image);
 
 
-    // Loop to draw all intruders here
-    drawTarget(painter,5);
+//    // Loop to draw all intruders here
+    if (!strcmp(self.TCAS_status,"RESOLVING")){
+        drawTarget(painter,self.Resolution_val/FT2M*60/1000);
+    }else{
+        drawTarget(painter,0);
+    }
+
+ //        drawTarget(painter,1);
+    qDebug()<<self.Resolution_val/FT2M*60/1000;
     drawIntruders(painter);
+
 }

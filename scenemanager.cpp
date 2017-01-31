@@ -31,13 +31,6 @@ void SceneManager::sendSelf()
     scene_items->setCRC(crc);
     broadcaster->messageToBuffer(buff,scene_items->getSelf());
 
-    qDebug()<<"-------";
-    valueInHex = QString("%1").arg(scene_items->getSelf().CRC_32 , 0, 16);
-    qDebug()<<valueInHex;
-
-    valueInHex = QString("%1").arg(broadcaster->bufferToMessage(buff).CRC_32 , 0, 16);
-    qDebug()<<valueInHex;
-
     int bytes= broadcaster->sendBuffer(buff);
 
 }
