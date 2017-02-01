@@ -126,9 +126,6 @@ void SceneItems::drawIntruders(QPainter *painter)
         qreal dist = intr_rel.distanceToPoint(QVector3D(0,0,0));
         //Change to our frame of ref
         //Rever matrizes de rotação!
-        qDebug()<<"-------";
-        qDebug()<<intr_enu.z();
-        qDebug()<<me_enu.z();
         intr_rel.setX(intr_rel.x()*cos(bearing*qreal(M_PI)/180.0)-intr_rel.y()*sin(bearing*qreal(M_PI)/180.0));
         intr_rel.setY(intr_rel.x()*sin(bearing*qreal(M_PI)/180.0)+intr_rel.y()*cos(bearing*qreal(M_PI)/180.0));
 
