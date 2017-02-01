@@ -268,130 +268,134 @@ void SceneItems::drawTarget(QPainter *painter, qreal v_min)
     int spanAngle;
 
     qreal a;
+    int v1=230;//390
+    int v2=205;//350
+    int v3=460;//780
+    int v4=410;//700
 
 
     if(v_min>0 && v_min<=1){
         a=converter(v_min,0,0,1,63);
 
-        painter->drawArc(width/2-390,height/2-350,780,700,startAngle,-(180+a)*16);
+        painter->drawArc(width/2-v1,height/2-v2,v3,v4,startAngle,-(180+a)*16);
 
         painter->setPen(pen2);
 
-        painter->drawArc(width/2-390,height/2-350,780,700,startAngle+5*16,(180-a-10)*16);
+        painter->drawArc(width/2-v1,height/2-v2,v3,v4,startAngle+5*16,(180-a-10)*16);
 
     }else if (v_min<0 && v_min>=-1){
         a=converter(-v_min,0,0,1,63);
 
         painter->setPen(pen);
-        painter->drawArc(width/2-390,height/2-350,780,700,startAngle,(180+a)*16);
+        painter->drawArc(width/2-v1,height/2-v2,v3,v4,startAngle,(180+a)*16);
 
         painter->setPen(pen2);
-        painter->drawArc(width/2-390,height/2-350,780,700,startAngle-5*16,-(180-a-10)*16);
+        painter->drawArc(width/2-v1,height/2-v2,v3,v4,startAngle-5*16,-(180-a-10)*16);
 
     }else if(v_min>1 && v_min<=1.5){
         a=converter(v_min,1,63,1.5,88);
 
         painter->setPen(pen);
-        painter->drawArc(width/2-390,height/2-350,780,700,startAngle,-(180+a)*16);
+        painter->drawArc(width/2-v1,height/2-v2,v3,v4,startAngle,-(180+a)*16);
 
         painter->setPen(pen2);
-        painter->drawArc(width/2-390,height/2-350,780,700,startAngle+5*16,(180-a-10)*16);
+        painter->drawArc(width/2-v1,height/2-v2,v3,v4,startAngle+5*16,(180-a-10)*16);
 
     }else if(v_min<-1 && v_min>=-1.5){
         a=converter(-v_min,1,63,1.5,88);
 
         painter->setPen(pen);
-        painter->drawArc(width/2-390,height/2-350,780,700,startAngle,(180+a)*16);
+        painter->drawArc(width/2-v1,height/2-v2,v3,v4,startAngle,(180+a)*16);
 
         painter->setPen(pen2);
-        painter->drawArc(width/2-390,height/2-350,780,700,startAngle-5*16,-(180-a-10)*16);
+        painter->drawArc(width/2-v1,height/2-v2,v3,v4,startAngle-5*16,-(180-a-10)*16);
 
     }else if(v_min>1.5 && v_min<=2){
 
         a=converter(v_min,1.5,88,2,103);
         //qDebug()<<a;
         painter->setPen(pen);
-        painter->drawArc(width/2-390,height/2-350,780,700,startAngle,-(180+a)*16);
+        painter->drawArc(width/2-v1,height/2-v2,v3,v4,startAngle,-(180+a)*16);
 
         painter->setPen(pen2);
-        painter->drawArc(width/2-390,height/2-350,780,700,startAngle+5*16,(180-a-10)*16);
+        painter->drawArc(width/2-v1,height/2-v2,v3,v4,startAngle+5*16,(180-a-10)*16);
 
     }else if(v_min<-1.5 && v_min>=-2){
 
         a=converter(-v_min,1.5,88,2,103);
         //qDebug()<<a;
         painter->setPen(pen);
-        painter->drawArc(width/2-390,height/2-350,780,700,startAngle,(180+a)*16);
+        painter->drawArc(width/2-v1,height/2-v2,v3,v4,startAngle,(180+a)*16);
 
         painter->setPen(pen2);
-        painter->drawArc(width/2-390,height/2-350,780,700,startAngle-5*16,-(180-a-10)*16);
+        painter->drawArc(width/2-v1,height/2-v2,v3,v4,startAngle-5*16,-(180-a-10)*16);
 
     }
     else if(v_min>2 && v_min<=3){
         a=converter(v_min,2,103,3,128);
 
         painter->setPen(pen);
-        painter->drawArc(width/2-390,height/2-350,780,700,startAngle,-(180+a)*16);
+        painter->drawArc(width/2-v1,height/2-v2,v3,v4,startAngle,-(180+a)*16);
 
         painter->setPen(pen2);
-        painter->drawArc(width/2-390,height/2-350,780,700,startAngle+5*16,(180-a-10)*16);
+        painter->drawArc(width/2-v1,height/2-v2,v3,v4,startAngle+5*16,(180-a-10)*16);
 
     }else if(v_min<-2 && v_min>=-3){
         a=converter(-v_min,2,103,3,128);
 
         painter->setPen(pen);
-        painter->drawArc(width/2-390,height/2-350,780,700,startAngle,(180+a)*16);
+        painter->drawArc(width/2-v1,height/2-v2,v3,v4,startAngle,(180+a)*16);
 
         painter->setPen(pen2);
-        painter->drawArc(width/2-390,height/2-350,780,700,startAngle-5*16,-(180-a-10)*16);
+        painter->drawArc(width/2-v1,height/2-v2,v3,v4,startAngle-5*16,-(180-a-10)*16);
 
     }
     else if(v_min>3 && v_min<=4){
     a=converter(v_min,3,128,4,145);
 
     painter->setPen(pen);
-    painter->drawArc(width/2-390,height/2-350,780,700,startAngle,-(180+a)*16);
+    painter->drawArc(width/2-v1,height/2-v2,v3,v4,startAngle,-(180+a)*16);
 
     painter->setPen(pen2);
-    painter->drawArc(width/2-390,height/2-350,780,700,startAngle+5*16,(180-a-10)*16);
+    painter->drawArc(width/2-v1,height/2-v2,v3,v4,startAngle+5*16,(180-a-10)*16);
 
     }else if(v_min<-3 && v_min>=-4){
         a=converter(-v_min,3,128,4,145);
 
         painter->setPen(pen);
-        painter->drawArc(width/2-390,height/2-350,780,700,startAngle,(180+a)*16);
+        painter->drawArc(width/2-v1,height/2-v2,v3,v4,startAngle,(180+a)*16);
 
         painter->setPen(pen2);
-        painter->drawArc(width/2-390,height/2-350,780,700,startAngle-5*16,-(180-a-10)*16);
+        painter->drawArc(width/2-v1,height/2-v2,v3,v4,startAngle-5*16,-(180-a-10)*16);
 
         }
     else if(v_min>4 && v_min<=5){
         a=converter(v_min,4,145,5,159);
 
         painter->setPen(pen);
-        painter->drawArc(width/2-390,height/2-350,780,700,startAngle,-(180+a)*16);
+        painter->drawArc(width/2-v1,height/2-v2,v3,v4,startAngle,-(180+a)*16);
 
         painter->setPen(pen2);
-        painter->drawArc(width/2-390,height/2-350,780,700,startAngle+5*16,(180-a-10)*16);
+        painter->drawArc(width/2-v1,height/2-v2,v3,v4,startAngle+5*16,(180-a-10)*16);
 
     }else if(v_min<-4 && v_min>=-5){
         a=converter(-v_min,4,145,5,159);
 
         painter->setPen(pen);
-        painter->drawArc(width/2-390,height/2-350,780,700,startAngle,(180+a)*16);
+        painter->drawArc(width/2-v1,height/2-v2,v3,v4,startAngle,(180+a)*16);
 
         painter->setPen(pen2);
-        painter->drawArc(width/2-390,height/2-350,780,700,startAngle-5*16,-(180-a-10)*16);
+        painter->drawArc(width/2-v1,height/2-v2,v3,v4,startAngle-5*16,-(180-a-10)*16);
 
     }
     else if(v_min>5 && v_min<=6){
         a=converter(v_min,5,159,6,171);
 
         painter->setPen(pen);
-        painter->drawArc(width/2-390,height/2-350,780,700,startAngle,-(180+a)*16);
+        painter->drawArc(width/2-v1,height/2-v2,v3,v4,startAngle,-(180+a)*16);
 
         painter->setPen(pen2);
-        painter->drawArc(width/2-390,height/2-350,780,700,startAngle+5*16,(180-a-10)*16);
+        painter->drawArc(width/2-v1,height/2-v2,v3,v4,startAngle+5*16,(180-a-10)*16);
     }
 
 
@@ -521,8 +525,8 @@ qreal SceneItems::stopAccel(qreal v, qreal a, qreal t, int sense)
 qreal SceneItems::ownAltAt(qreal v, qreal a, qreal t, int sense)
 {
     qreal s = stopAccel(v,a,t,sense);
-    qreal q = qMin(t,s);
-    qreal l = qMax(0.0,(t-s));
+    qreal q = qMin(t,s);//time to reach cpa or the desired target speed
+    qreal l = qMax(0.0,(t-s));//time we actually spend at target speed
 
     return sense*q*q*a/2+q*v_U+me.z()+sense*l*v;
 }
@@ -682,11 +686,15 @@ void SceneItems::computeResolutionStrength(QVector3D *intr, QVector3D *intr_spd)
     qreal h_at_cpa, h_diff;
     do{
         target_v += inc*sense;
-        h_at_cpa = ownAltAt(target_v,0.35*G,taumod_RA,sense);
+        h_at_cpa = ownAltAt(target_v,0.7*G,taumod_RA,sense);
         h_diff = h_at_cpa - (intr->z() + taumod_RA * intr_spd->z());
     }while(qFabs(h_diff)<target_diff && qFabs(target_v)<MAXVSPD*FT2M/60);
     if (qFabs(target_v)>MAXVSPD*FT2M/60){target_v=sense*MAXVSPD*FT2M/60;}
-    self.Resolution_val = target_v;
+    if (strcmp(self.TCAS_status,"RESOLVING")){
+        self.Resolution_val = target_v;
+        if (sense && acc_z<=0.7*G){ goUp();goUp();
+        }else if (sense==-1 && acc_z<=0.7*G){ goDown();goDown(); }
+    }
 }
 
 
@@ -719,14 +727,14 @@ void SceneItems::advanceStatus(Message *intruder, Advisory result){
             if (!strcmp(self.TCAS_status,"CLEAR") || !strcmp(self.TCAS_status,"ADVISORY")){
                 if (!strcmp(intruder->TCAS_status,"RESOLVING")){
                     complementResolutions(intruder);
-                    computeResolutionStrength(&intr, &intr_spd);
+                    computeResolutionStrength(&intr, &intr_spd); //executed at most once
                 }else{
                     int sense = RA_sense(&intr, &intr_spd, 1500 * FT2M / 60.0, 0.35 * G, taumod_RA);
                     if (sense==1){
                         strncpy(self.Resolution,"CLIMB",16);
                     }else{
                         strncpy(self.Resolution,"DESCEND",16);}
-                    computeResolutionStrength(&intr, &intr_spd);
+                    computeResolutionStrength(&intr, &intr_spd); // executed at most once
                 }
                 strncpy(self.TCAS_status,"RESOLVING",16);
             }else if(!strcmp(self.TCAS_status,"RESOLVING")){
@@ -735,7 +743,7 @@ void SceneItems::advanceStatus(Message *intruder, Advisory result){
                     if (!diff_resolutions && self.Ac_id < intruder->Ac_id){
                         complementResolutions(intruder);}
                 }
-                computeResolutionStrength(&intr, &intr_spd);
+                computeResolutionStrength(&intr, &intr_spd); //executed while in conflict
             }
 
     }
