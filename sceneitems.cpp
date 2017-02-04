@@ -692,8 +692,8 @@ void SceneItems::computeResolutionStrength(QVector3D *intr, QVector3D *intr_spd)
     if (qFabs(target_v)>MAXVSPD*FT2M/60){target_v=sense*MAXVSPD*FT2M/60;}
     if (strcmp(self.TCAS_status,"RESOLVING")){
         self.Resolution_val = target_v;
-        if (sense && acc_z<=0.7*G){ goUp();goUp();
-        }else if (sense==-1 && acc_z<=0.7*G){ goDown();goDown(); }
+        if (sense && acc_z<=0.7*G){ acc_z=2*ACC_INCR;
+        }else if (sense==-1 && acc_z<=0.7*G){ acc_z=-2*ACC_INCR; }
     }
 }
 
